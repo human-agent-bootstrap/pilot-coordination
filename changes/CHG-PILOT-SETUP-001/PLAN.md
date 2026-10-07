@@ -20,6 +20,7 @@ A service containing only README and CODEOWNERS remains a brand-new service for 
 - [AC-001] Repository context reports bootstrapEligible=true for README plus .github/CODEOWNERS.
 - [AC-002] Adding product source at the committed service gitlink makes bootstrapEligible=false.
 - [AC-003] Root tests, planning UI browser tests, registry and write-scope checks pass.
+- [AC-004] Work-unit normalization uses running generated-ID counts rather than rescanning all predecessors, preserving existing ID generation and passing the original 10,000-item limit test on hosted CI.
 
 ## Contracts
 

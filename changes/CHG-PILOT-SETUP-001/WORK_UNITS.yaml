@@ -14,7 +14,9 @@ work_units:
     write_paths:
       - changes/CHG-PILOT-SETUP-001/**
       - scripts/orchestration/server.mjs
+      - scripts/orchestration/change-service.mjs
       - tests/pilot-anchor.test.mjs
+      - tests/pilot-limit.test.mjs
       - PILOT.md
     depends_on: []
     verify:

@@ -77,14 +77,17 @@ export function normalizeDraft(input = {}) {
     title: text(input.title) || 'Primary goal',
     outcome: text(input.goal),
   }] : []);
+  const generatedIdCounts = new Map();
   const workUnits = Array.isArray(input.workUnits) ? input.workUnits.map((raw, index) => {
-    const baseId = text(raw.id) || slug(raw.service || raw.goal || `work-${index + 1}`);
-    const priorGeneratedIds = input.workUnits.slice(0, index)
-      .filter((candidate) => !text(candidate.id))
-      .map((candidate) => slug(candidate.service || candidate.goal || 'work'));
-    const occurrence = priorGeneratedIds.filter((id) => id === baseId).length + 1;
+    const explicitId = text(raw.id);
+    const baseId = explicitId || slug(raw.service || raw.goal || `work-${index + 1}`);
+    const occurrence = (generatedIdCounts.get(baseId) ?? 0) + 1;
+    if (!explicitId) {
+      const countedId = slug(raw.service || raw.goal || 'work');
+      generatedIdCounts.set(countedId, (generatedIdCounts.get(countedId) ?? 0) + 1);
+    }
     const suffix = occurrence > 1 ? `-${occurrence}` : '';
-    const id = text(raw.id) || `${baseId.slice(0, 128 - suffix.length)}${suffix}`;
+    const id = explicitId || `${baseId.slice(0, 128 - suffix.length)}${suffix}`;
     return {
       id,
       goalId: text(raw.goalId) || goals[0]?.id || '',

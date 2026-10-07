@@ -2,7 +2,7 @@
 
 ## 실습의 출발점
 
-> 먼저 `CHG-PILOT-SETUP-001` 설정 PR을 독립 리뷰 후 병합합니다. README와 CODEOWNERS만 있는 서비스도 신규 서비스로 인식하도록 하는 수정입니다. 제품 계획 `CHG-TASK-001`은 그 다음 UI에서 작성합니다.
+> 먼저 `CHG-PILOT-SETUP-001` 설정 PR을 독립 리뷰 후 병합합니다. README와 CODEOWNERS만 있는 서비스의 신규 판정과 CI에서 발견된 작업 ID 정규화의 반복 탐색을 수정합니다. 제품 계획 `CHG-TASK-001`은 그 다음 UI에서 작성합니다.
 
 이 Root와 연결된 두 서비스는 **계획 작성부터 직접 테스트할 수 있는 준비 상태**입니다. 서비스에는 README와 CODEOWNERS만 있으며 제품 코드, 승인된 계획, 작업 지시서, 구현 PR, Candidate는 없습니다.
 

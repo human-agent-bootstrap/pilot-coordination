@@ -46,15 +46,6 @@ async function github(fetchImpl, apiBase, token, path) {
   return response.json();
 }
 
-function latestReviews(reviews) {
-  const byUser = new Map();
-  for (const review of reviews) {
-    const login = review.user?.login;
-    if (login) byUser.set(login, review);
-  }
-  return [...byUser.values()];
-}
-
 export async function verifyPrs({
   argv = process.argv.slice(2),
   cwd = process.cwd(),
@@ -96,11 +87,6 @@ export async function verifyPrs({
     if (!pull.merged_at) throw new Error(`${row.key}: PR #${row.number} is not merged`);
     const author = pull.user?.login;
     if (!author) throw new Error(`${row.key}: GitHub PR author is missing`);
-    if (latestReviews(await github(fetchImpl, resolvedApiBase, token, `/repos/${slug}/pulls/${row.number}/reviews?per_page=100`))
-      .filter((review) => review.user?.login !== author)
-      .every((review) => review.state !== 'APPROVED')) {
-      throw new Error(`${row.key}: no independent APPROVED review`);
-    }
     const expected = [
       ['base_sha', pull.base?.sha],
       ['head_sha', pull.head?.sha],

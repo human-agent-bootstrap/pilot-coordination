@@ -206,7 +206,7 @@ git -C <workspace-path> push -u origin <Required branch>
 ```
 
 PR을 열고 `.github/pull_request_template.md`를 채웁니다. 실행하지 못한 검증도 숨기지 않습니다.
-이후 CI → **Writer가 아닌 리뷰어** 승인 → Service Owner merge 순서입니다 (`RUNBOOK.md` §8).
+이후 CI → 사람이 내용·증거 확인 → 사람 merge 순서입니다 (`RUNBOOK.md` §8). Writer 본인이 확인·병합할 수 있고 별도 리뷰어 계정은 필요하지 않습니다.
 
 squash merge면 PR head SHA와 merge SHA가 다릅니다. 이후 단계에서 쓰는 값은 **merge SHA**입니다.
 
@@ -214,8 +214,7 @@ squash merge면 PR head SHA와 merge SHA가 다릅니다. 이후 단계에서 �
 GH_HOST=<host> gh pr view <pr-number> --repo <org>/<repo> --json mergeCommit --jq .mergeCommit.oid
 ```
 
-Coordinator에게 넘길 최종 증거: PR 번호, base SHA, PR head SHA, merge SHA, CI 결과, 리뷰어
-승인, 계약 이탈과 미실행 검증.
+Coordinator에게 넘길 최종 증거: PR 번호, base SHA, PR head SHA, merge SHA, CI 결과, 사람 확인 기록, 계약 이탈과 미실행 검증.
 
 ---
 
@@ -227,7 +226,7 @@ Coordinator에게 넘길 최종 증거: PR 번호, base SHA, PR head SHA, merge 
 |---|---|---|
 | `changes/<ID>/WORK_UNITS.yaml` | Coordinator (`candidate-integration` unit) | 읽기만 합니다. 자기 Work Unit이 `ready`인지 확인. 병합 후 `state: merged` 기록은 Coordinator |
 | `changes/<ID>/PRS.yaml` | Coordinator | 고치지 않습니다. PR 번호와 SHA를 handoff로 전달 |
-| `changes/<ID>/STATUS.md` | Coordinator | 고치지 않습니다. CI·리뷰·미실행 검증을 handoff로 전달 |
+| `changes/<ID>/STATUS.md` | Coordinator | 고치지 않습니다. CI·사람 확인 기록·미실행 검증을 handoff로 전달 |
 | 서비스 저장소의 `write_paths` | **Writer** | 유일하게 쓰는 범위 |
 
 근거는 계획 자체에 있습니다. 구현 Work Unit의 `write_paths`에는 서비스 경로만 들어 있고, Root
@@ -257,8 +256,7 @@ sha: <서비스 merge SHA>
 ```
 
 그다음 `npm run verify:prs`와 `npm run verify:candidate`로 기록과 실제 GitHub 상태를 대조하고,
-Candidate PR은 구현한 사람과 **독립된 사람**이 승인합니다. 역할을 겸할 때 포기할 수 없는 선이
-여기입니다 — 기록을 먼저 쓰고 나중에 맞추는 것이 아니라, 병합된 사실을 그대로 옮겨 적습니다.
+Candidate PR은 구현한 사람 본인이 검증 결과를 확인하고 병합할 수 있습니다. 기록을 먼저 쓰고 나중에 맞추는 것이 아니라, 병합된 사실을 그대로 옮겨 적습니다.
 
 ## 8. 멈춰야 하는 상황
 

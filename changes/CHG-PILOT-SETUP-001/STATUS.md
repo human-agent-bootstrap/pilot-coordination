@@ -1,9 +1,7 @@
 # CHG-PILOT-SETUP-001 status
 
-Human review and merge pending. This is not the product Change CHG-TASK-001.
+Single-account settings requested by the user; merge authorized after checks.
 
-The prepared services contain README and CODEOWNERS. The original UI recognizes only README/license/gitignore anchors, so it rejects the documented first-service ** scope. A regression test reproduces this and a one-line allowlist repair addresses it without accepting product files.
+Keep the linear work-unit normalization repair. Remove the unused extra-file anchor exception together with file-owner configuration. No external approval lookup remains in PR verification; merge/SHA checks remain.
 
-The initial PR hosted run also exposed the existing 10,000-work-unit timing check: normalization rescanned every preceding unit. A running-count implementation removes the quadratic scan, retains generated-ID behavior, and keeps the original timing/limit check intact. Fresh exact-head verification is required.
-
-Product planning, Writer dispatch, implementation, service PRs, Candidate and deployment are not started. Reconcile this setup unit to merged when recording the next reviewed Root coordination update; do not invent a merge SHA in advance.
+Product planning, Writer dispatch, implementation, service feature PRs, product Candidate and deployment have not started. Use actual remote merge receipts for setup pointers and never invent review evidence.

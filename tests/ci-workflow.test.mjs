@@ -6,7 +6,6 @@ import test from 'node:test';
 const workflow = readFileSync(resolve(import.meta.dirname, '../.github/workflows/ci.yml'), 'utf8');
 const candidateGate = readFileSync(resolve(import.meta.dirname, '../scripts/ci-candidate-check.mjs'), 'utf8');
 const e2eRunner = readFileSync(resolve(import.meta.dirname, '../scripts/test-e2e.mjs'), 'utf8');
-const codeowners = readFileSync(resolve(import.meta.dirname, '../.github/CODEOWNERS'), 'utf8');
 const gitignore = readFileSync(resolve(import.meta.dirname, '../.gitignore'), 'utf8');
 const pullRequestJob = workflow.slice(
   workflow.indexOf('  pull-request:'),
@@ -56,10 +55,8 @@ test('final candidates run E2E when a suite is present', () => {
   assert.doesNotMatch(workflow, /hashFiles\('e2e\/\*\.test\.mjs'\)/);
 });
 
-test('trusted executable inputs require coordinator review', () => {
-  for (const path of ['/.github/', '/scripts/', '/tests/', '/e2e/', '/package.json', '/package-lock.json']) {
-    assert.match(codeowners, new RegExp(`^${path.replaceAll('/', '\\/').replace('.', '\\.')} `, 'm'));
-  }
+test('pilot has no file-owner approval dependency', () => {
+  assert.equal(existsSync(resolve(import.meta.dirname, '../.github/CODEOWNERS')), false);
 });
 
 test('local task packets are ignored separately from macOS metadata', () => {

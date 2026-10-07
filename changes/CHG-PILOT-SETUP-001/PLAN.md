@@ -1,35 +1,33 @@
-# CHG-PILOT-SETUP-001 — Initial service anchor readiness
+# CHG-PILOT-SETUP-001 — Single-account pilot setup
 
 ## State
 
-- Status: APPROVAL REQUESTED; human review and merge pending.
-- Coordinator: whdvlf94
+- Status: APPROVAL REQUESTED; settings PR merge explicitly authorized by the user.
+- Coordinator and human decision owner: whdvlf94
 - Plan base: 0a2512a0192a1e81a30086457853e4dd3d08aa01
 
 ## Goal
 
-A service containing only README and CODEOWNERS remains a brand-new service for the first implementation Work Unit.
+Run the template pilot with one human account: the author checks CI and evidence and can merge without another reviewer or file-owner approval.
 
 ## Non-goals
 
-- No product implementation, API contract, service SHA change, Candidate, deployment, review bypass, or approval impersonation.
-- No service executable CI files are added to the anchor allowlist.
+- No product implementation, API contract, Writer dispatch, product Candidate or deployment.
+- No weakening of scope, branch/base/SHA matching, required Root CI, force-push or deletion protections.
 
 ## Acceptance criteria
 
-- [AC-001] Repository context reports bootstrapEligible=true for README plus .github/CODEOWNERS.
-- [AC-002] Adding product source at the committed service gitlink makes bootstrapEligible=false.
-- [AC-003] Root tests, planning UI browser tests, registry and write-scope checks pass.
-- [AC-004] Work-unit normalization uses running generated-ID counts rather than rescanning all predecessors, preserving existing ID generation and passing the original 10,000-item limit test on hosted CI.
+- [AC-001] File-owner configuration is removed from the three pilot default branches.
+- [AC-002] PR verification accepts a merged PR without approval lookup and still rejects wrong SHA, missing PR author or unmerged state.
+- [AC-003] Generated plans, guides and UI require a human content/CI check, not another reviewer account.
+- [AC-004] Root tests, browser UI tests, registry, work-unit scope and actual GitHub PR checks pass.
+- [AC-005] Work-unit normalization keeps running ID counts; the original 10,000-item limit test stays unchanged.
+- [AC-006] Service setup pointer receipts identify exact reviewed-by-user metadata-only merges; product pointer movement continues to require a Candidate.
 
-## Contracts
+## Human gate
 
-None; this is a Root setup repair, not the task-board product plan.
+The user explicitly requested removing reviewer setup and authorized merging these setup PRs after verification. Do not represent this as an independent review. Product work needs its own merged plan.
 
-## Review gate
+## Recovery
 
-This setup PR is implemented locally as a bounded configuration discovery/repair. The manifest's approved serialization requests review; it is not human approval. A person other than the author must approve and merge before the product rehearsal starts. No Writer packet is emitted from this setup Change.
-
-## Rollback
-
-Revert this one-file allowlist repair through a reviewed PR. No data or service pointers change.
+Restore the previous exact configuration in a new PR if needed. No product or data is created or changed.

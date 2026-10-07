@@ -993,7 +993,7 @@ async function runPlanPr() {
       link.textContent = response.prUrl;
       result.append(link);
     }
-    showMessage(`계획 PR #${response.prNumber}을 올렸습니다. 리뷰어 승인과 병합 후 병합 확인을 누르세요.`, 'success');
+    showMessage(`계획 PR #${response.prNumber}을 올렸습니다. CI와 내용을 확인해 사람이 병합한 뒤 병합 확인을 누르세요.`, 'success');
     await loadStatus();
     renderPublish();
   } catch (error) {

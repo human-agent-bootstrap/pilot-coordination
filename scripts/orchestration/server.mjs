@@ -152,7 +152,7 @@ function bootstrapEligible(root, service, baseSha) {
       .split('\n')
       .map((item) => item.trim())
       .filter(Boolean);
-    const anchorFiles = new Set(['README', 'README.md', '.gitignore', 'LICENSE', 'LICENSE.md', '.github/CODEOWNERS']);
+    const anchorFiles = new Set(['README', 'README.md', '.gitignore', 'LICENSE', 'LICENSE.md']);
     return files.length > 0 && files.every((file) => anchorFiles.has(file));
   } catch {
     return false;

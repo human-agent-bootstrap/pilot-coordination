@@ -74,7 +74,7 @@ try {
     process.stdout.write(`APPLIED: registered ${id} at ${path}\n`);
     const check = spawnSync(process.execPath, [join(import.meta.dirname, 'verify-registry.mjs')], { encoding: 'utf8', stdio: 'inherit' });
     if (check.status !== 0) throw new Error('registry validation failed after adding the service');
-    process.stdout.write(`Next: record ${id} in a change's work units, and add it to CODEOWNERS.\n`);
+    process.stdout.write(`Next: record ${id} and its Writer in a change's work units.\n`);
   }
 } catch (error) {
   fail(error.message);

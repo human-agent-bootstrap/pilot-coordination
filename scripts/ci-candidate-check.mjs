@@ -1,6 +1,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fail, parseArgs, readRegistry, readYaml, required } from './lib.mjs';
+import { verifySetupPointer } from './verify-setup-pointers.mjs';
 
 function git(args) {
   return execFileSync('git', args, { cwd: process.cwd(), encoding: 'utf8' }).trim();
@@ -57,11 +58,25 @@ try {
       run(match[1], match[2], options.before);
     }
     const unrecorded = changedServices.filter((path) => !declaredServices.has(path));
+    const setupReceiptPath = 'changes/CHG-PILOT-SETUP-001/PRS.yaml';
+    const setup = [];
+    if (unrecorded.length && changed.includes(setupReceiptPath)) {
+      const receipts = readYaml(setupReceiptPath).prs ?? [];
+      for (const path of unrecorded) {
+        const service = readRegistry().services.find((entry) => entry.path === path);
+        const receipt = receipts.find((row) => row.repo === service.id);
+        verifySetupPointer({ root: process.cwd(), path, before: options.before, after: options.after, service, receipt });
+        setup.push(path);
+      }
+      const verified = spawnSync(process.execPath, [join(import.meta.dirname, 'verify-prs.mjs'), '--change', 'CHG-PILOT-SETUP-001'], { cwd: process.cwd(), stdio: 'inherit' });
+      if (verified.status !== 0) process.exit(verified.status ?? 1);
+      for (const path of setup) process.stdout.write(`NOTE: verified metadata-only setup pointer: ${path}; not a product Candidate.\n`);
+    }
     const initial = options['allow-initial-registration'] === 'true'
       ? unrecorded.filter((path) => !git(['ls-tree', options.before, '--', path]))
       : [];
     for (const path of initial) process.stdout.write(`NOTE: initial service registration: ${path}; no product integration claimed.\n`);
-    const missingCandidates = unrecorded.filter((path) => !initial.includes(path));
+    const missingCandidates = unrecorded.filter((path) => !initial.includes(path) && !setup.includes(path));
     if (missingCandidates.length) throw new Error(`submodule pointer changed without a matching candidate: ${missingCandidates.join(', ')}`);
     if (!candidateFiles.length && !changedServices.length) {
       process.stdout.write('NOTE: this push did not change a candidate or service pointer.\n');

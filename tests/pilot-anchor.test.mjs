@@ -19,7 +19,6 @@ function fixture() {
     git(cwd, 'config', 'advice.addEmbeddedRepo', 'false');
   }
   writeFileSync(join(service, 'README.md'), 'Unimplemented API anchor\n');
-  writeFileSync(join(service, '.github/CODEOWNERS'), '* @reviewer\n');
   git(service, 'add', '.');
   git(service, 'commit', '-qm', 'anchor with governance');
   writeFileSync(join(root, 'services/registry.yaml'), 'version: 2\ngithub:\n  host: github.com\nservices:\n  - id: api\n    path: services/api\n    repo: https://github.com/example/api.git\n    owners: [reviewer]\n    verify: []\n');
@@ -29,7 +28,7 @@ function fixture() {
   return { root, service, git };
 }
 
-test('CODEOWNERS without product code remains eligible for the first service implementation', () => {
+test('README-only anchor remains eligible for the first service implementation', () => {
   const { root } = fixture();
   try {
     assert.equal(repositoryContext(root).services[0].bootstrapEligible, true);

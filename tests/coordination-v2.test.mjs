@@ -567,25 +567,23 @@ evidence:
   }
 });
 
-test('verify:prs checks GitHub merge SHAs and independent approval', async () => {
+test('verify:prs checks GitHub merge SHAs without a separate approval', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'coord-v2-prs-'));
   const base = 'a'.repeat(40);
   const head = 'b'.repeat(40);
   const merge = 'c'.repeat(40);
-  let reviewer = 'bob';
+  let responseMerge = merge;
   const requested = [];
   const fetchImpl = async (url) => {
     requested.push(url);
     return ({
     ok: true,
-    json: async () => url.endsWith('/reviews?per_page=100')
-      ? [{ user: { login: reviewer }, state: 'APPROVED' }]
-      : ({
+    json: async () => ({
         merged_at: '2026-09-29T00:00:00Z',
         user: { login: 'alice' },
         base: { sha: base },
         head: { sha: head },
-        merge_commit_sha: merge,
+        merge_commit_sha: responseMerge,
       }),
     });
   };
@@ -620,13 +618,15 @@ prs:
     assert.match(passed, /1 merged PR/);
     assert.ok(requested.every((url) => url.startsWith('https://api.github.com/')));
 
-    reviewer = 'alice';
+    assert.equal(requested.some((url) => url.includes('/reviews')), false);
+    responseMerge = 'd'.repeat(40);
     await assert.rejects(() => verifyPrs({
       argv: ['--change', 'CHG-PRS-001'],
       cwd: dir,
       env: { COORDINATION_GITHUB_TOKEN: 'test' },
       fetchImpl,
-    }), /no independent APPROVED review/);
+    }), /merge_sha.*does not match GitHub/);
+    responseMerge = merge;
 
     writeFileSync(join(dir, 'changes/CHG-PRS-001/PRS.yaml'), 'schema_version: 1\nprs: []\n');
     await assert.rejects(() => verifyPrs({

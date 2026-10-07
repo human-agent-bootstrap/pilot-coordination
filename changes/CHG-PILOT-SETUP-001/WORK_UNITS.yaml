@@ -2,11 +2,11 @@ schema_version: 1
 change_id: CHG-PILOT-SETUP-001
 state: approved
 plan_base_sha: 0a2512a0192a1e81a30086457853e4dd3d08aa01
-plan_merge_sha: pending
+plan_merge_sha: 00113360936b85cda8c077d30b68595cdaae32a0
 work_units:
   - id: setup-readiness
     repo: root
-    state: ready
+    state: merged
     goal: Prepare a single-account pilot without file-owner or separate reviewer approval.
     branch: fix/CHG-PILOT-SETUP-001/setup-readiness
     base_sha: 0a2512a0192a1e81a30086457853e4dd3d08aa01
@@ -42,4 +42,21 @@ work_units:
     verify:
       - npm test
       - npm run test:ui
+      - npm run verify:registry -- --strict
+  - id: empty-readme
+    repo: root
+    state: ready
+    goal: Pin the service merges that empty README.md without changing product inputs.
+    branch: docs/CHG-PILOT-SETUP-001/empty-readme
+    base_sha: 00113360936b85cda8c077d30b68595cdaae32a0
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-SETUP-001/WORK_UNITS.yaml
+      - changes/CHG-PILOT-SETUP-001/PRS.yaml
+      - services/pilot-front
+      - services/pilot-back
+    depends_on:
+      - setup-readiness
+    verify:
+      - npm test
       - npm run verify:registry -- --strict

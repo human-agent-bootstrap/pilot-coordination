@@ -4,7 +4,7 @@
 
 - Status: DRAFT
 - Coordinator: <name>
-- Required approvers: <product-owner>, <service-owner>, <independent-reviewer>
+- Human merger: <coordinator> (may also author the PR)
 - Plan base: <ROOT_BASE_SHA>
 - Tracking: <issue-or-project-url | none>
 

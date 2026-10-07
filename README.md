@@ -63,8 +63,7 @@ git clone https://github.com/<내-계정>/<내-Root>.git
 cd <내-Root>
 npm ci
 
-npm run init -- --name "$(basename "$PWD")" --org <내-계정> \
-  --coordinator-owner @<내-깃허브-아이디> --apply
+npm run init -- --name "$(basename "$PWD")" --org <내-계정> --apply
 
 npm test && npm run verify:registry
 git add -A && git commit -m "chore: initialize coordination root"
@@ -72,7 +71,7 @@ git push origin main
 npm run ui
 ```
 
-`init`은 프로젝트 이름·GitHub 설정·리뷰 담당자를 채우고 템플릿 자체의 계획 기록을 정리합니다. **이 초기화는 Root를 만든 사람이 한 번만 실행합니다.**
+`init`은 프로젝트 이름·GitHub 설정을 채우고 템플릿 자체의 계획 기록을 정리합니다. **이 초기화는 Root를 만든 사람이 한 번만 실행합니다.**
 
 **확인:** 검증 명령이 모두 성공하고 `http://127.0.0.1:4173/#token=...` 형식의 주소가 출력됩니다. 이 주소를 **그대로** 브라우저에서 엽니다. 주소의 토큰은 실행 중인 세션에서만 유효하고, 터미널을 닫으면 UI도 종료됩니다.
 
@@ -137,7 +136,7 @@ git push origin main
 
 1. **승인 요청으로 확정** — 작업 상태를 계획 PR에 담습니다. 이후에는 UI에서 이 계획을 편집하지 않습니다.
 2. **계획 PR 올리기** — `changes/<계획 ID>/`만 담은 계획 PR을 만듭니다.
-3. GitHub에서 담당자와 독립된 리뷰어가 계획·계약·범위·검증 방법을 검토하고 **사람이 병합**합니다.
+3. GitHub에서 계획·계약·범위·검증 방법과 CI 결과를 확인하고 **사람이 병합**합니다. PR 작성자 본인이 병합해도 되며 별도 승인 계정은 필요하지 않습니다.
 4. **병합 상태 확인** — 병합된 계획 commit SHA를 가져옵니다.
 5. **작업 지시서 만들기** — 실행 가능한 작업을 확인하고 Run ID를 정해 발급합니다. 화면의 기본 Run ID를 그대로 사용해도 됩니다.
 

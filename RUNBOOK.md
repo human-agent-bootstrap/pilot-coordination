@@ -23,7 +23,7 @@
 |---|---|
 | Coordinator(계획 진행자) | 계획·계약·Work Unit·상태·Candidate 관리 |
 | Writer(담당자) | 할당된 서비스와 경로만 구현하고 검증 |
-| Reviewer(리뷰어) | Writer와 독립적으로 PR 검토 |
+| 사람 확인 | PR 작성자 본인이 계획·diff·CI 결과를 확인할 수 있음 |
 | Service Owner(서비스 소유자) | 서비스 PR merge |
 | Release Owner(배포 승인자) | Candidate와 staging 결과 승인 |
 
@@ -41,8 +41,7 @@ Root는 프로젝트마다 한 번 만들고 서비스도 한 번 등록한다.
 ```bash
 npm ci
 npm run init -- --name <root-name> --org <org> \
-  --github-host github.com \
-  --coordinator-owner @<org>/<team> --apply
+  --github-host github.com --apply
 
 npm run service:add -- \
   --repo https://github.com/<org>/<service-repo>.git \
@@ -80,7 +79,7 @@ stage 상태로는 실패한다.
 - PR CI는 GitHub-hosted runner에서 secret과 private submodule 없이 PR head를 검사한다.
 - `main` push CI만 self-hosted runner에서 private submodule과
   `COORDINATION_GITHUB_TOKEN`을 사용해 원격 PR/Candidate 검증을 다시 수행한다.
-- `main`은 직접 push를 금지하고 PR CI와 CODEOWNERS 승인을 요구하는 보호 규칙을 적용한다.
+- `main`은 직접 push를 금지하고 PR CI를 요구하는 보호 규칙을 적용한다. 별도 리뷰어 승인이나 파일 소유자 승인은 요구하지 않는다. PR 작성자 본인이 검증 후 병합할 수 있다.
   예외는 보호 규칙도 다른 참여자도 아직 없는 **1인 신규 Root의 최초 설정 commit**(초기화와
   서비스 등록)뿐이다. PR CI는 Change와 Work Unit에 연결된 브랜치만 검사하므로
   (`scripts/ci-workflow-check.mjs`) 설정 PR을 그대로 통과시킬 수 없다. 팀 공용 Root에서는
@@ -142,7 +141,7 @@ UI에서 목표, 비목표, 성공 기준, 참여 서비스, 작업 단위, 담�
 편집 원본으로 사용하며, 기존 초안은 `PLAN.md`, `WORK_UNITS.yaml`, 계약 파일에서 복원한다.
 활성 초안은 같은 Change ID로 갱신하고 UI가 관리하지 않는 파일은 보존한다. draft Change가
 둘 이상이면 임의 선택하지 않고 서버/API 검증을 실패시킨다.
-기존 절차대로 Planning PR을 독립 검토하고 병합해야 한다.
+Planning PR의 계획과 CI 결과를 사람이 확인하고 병합해야 한다. 작성자 본인이 확인해도 된다.
 
 저장 이후 검토 단계는 세 단계로 이어진다.
 
@@ -177,7 +176,7 @@ npm run change:create -- \
 - Work Unit별 Writer, branch와 `write_paths`
 - `depends_on`
 - 서비스별 검증 명령
-- Reviewer와 merge 이후 staging 검증 방법
+- 사람 병합 담당자와 merge 이후 staging 검증 방법
 
 서비스 Work Unit 예시:
 
@@ -225,7 +224,7 @@ Change 자체의 상태도 Planning PR 안에서 `state: approved`로 올린다.
 `approved` 또는 `active` manifest만 받는다. UI를 쓰면 승인 확정 단계가 이 값을 기록하고,
 CLI로 계획을 작성했다면 `WORK_UNITS.yaml` 최상단을 직접 고쳐 PR에 포함한다.
 
-Planning PR을 독립 리뷰 후 merge하고 merge SHA를 기록한다.
+Planning PR의 내용과 CI를 사람이 확인해 merge하고 merge SHA를 기록한다. 다른 리뷰어 계정은 필요하지 않다.
 
 ```bash
 GH_HOST=github.com gh pr view <planning-pr-number> \
@@ -399,7 +398,7 @@ git -C <service-workspace> push -u origin <work-unit-branch>
 ```text
 PR 생성
 → CI
-→ Writer가 아닌 Reviewer 승인
+→ 사람이 내용·CI 확인 (작성자 본인 가능)
 → Service Owner merge
 → merge SHA 확인
 ```
@@ -419,7 +418,7 @@ Base SHA
 PR head SHA
 Merge SHA
 CI 결과
-Reviewer 승인
+사람 확인 기록 (PR 본문 또는 체크리스트)
 계약 이탈과 미실행 검증
 ```
 
@@ -480,8 +479,7 @@ commit 범위와 모든 `AC-*`의 증거를 검사한다. 다만 증거 설명�
 `base_sha`가 stale해질 수 있다. 앞선 Candidate가 Root `main`에 merge된 뒤 현재 Candidate를
 rebase하고, 새 target을 기준으로 전체 검증과 필요한 승인을 다시 수행한다.
 
-Candidate PR은 사내 Wi-Fi에서 필수 검증 3종과, 가능한 경우 E2E를 실행한 뒤 구현 Writer와
-독립된 사람이 승인한다.
+Candidate PR은 필수 검증 3종과, 가능한 경우 E2E를 실행한 뒤 사람이 내용과 증거를 확인해 병합한다. 구현 Writer와 같은 사람이 확인할 수 있다.
 PR CI는 의도적으로 secret을 받지 않으므로 GitHub API 검증을 대신하지 않는다. Candidate PR
 merge 후에는 신뢰된 `main` 코드가 self-hosted CI에서 PR/SHA와 Candidate를 다시 검증하고,
 E2E suite가 있으면 함께 실행한다. 적용 가능한 staging 검증까지 통과해야 완료다.
@@ -506,10 +504,10 @@ Coordinator가 Root 변경을 승인받고 새 plan SHA로 작업 지시서를 �
 
 다음 항목이 모두 충족되어야 `STATUS.md`를 COMPLETE로 변경한다.
 
-- Planning PR 독립 승인 및 merge
+- Planning PR의 내용·CI 확인 및 사람 merge
 - 모든 Writer가 승인된 plan SHA와 base SHA를 사용
 - 모든 변경이 선언된 `write_paths` 안에 있음
-- 모든 서비스 PR이 CI와 독립 리뷰를 통과
+- 모든 서비스 PR이 CI를 통과하고 사람이 내용·증거를 확인
 - `PRS.yaml`과 실제 GitHub SHA가 일치
 - Candidate가 PR head SHA가 아닌 merge SHA를 사용
 - 모든 Acceptance Criteria에 실행 또는 리뷰 증거가 있음
@@ -545,7 +543,7 @@ Coordinator가 Root 변경을 승인받고 새 plan SHA로 작업 지시서를 �
 | `npm run workflow:check` | Root PR의 Work Unit 범위 검사 |
 | `node scripts/workflow-check.mjs ...` | 서비스 workspace의 branch·base·경로 검사 |
 | `npm run verify:registry` | registry, submodule, manifest와 경로 예약 검사 |
-| `npm run verify:prs` | 기록된 PR, SHA와 독립 승인을 GitHub와 대조 |
+| `npm run verify:prs` | 기록된 PR의 병합 상태와 SHA를 GitHub와 대조 |
 | `npm run verify:candidate` | exact-SHA Candidate와 Acceptance Criteria 증거 검사 |
 | `npm test` | Root 도구 테스트 |
 | `npm run test:e2e` | Root의 cross-repository E2E 실행 |

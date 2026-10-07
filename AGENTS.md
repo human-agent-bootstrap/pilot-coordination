@@ -103,13 +103,13 @@ A coding agent must not:
 - commit or push to `main` or another protected branch;
 - push any branch, invoke GitHub APIs, or receive a PAT or other secret;
 - force-push, merge, approve, deploy, publish, or change repository settings;
-- modify CI, CODEOWNERS, contracts, Root records, or submodule pointers unless its Work
+- modify CI, contracts, Root records, or submodule pointers unless its Work
   Unit explicitly allows those paths;
 - perform destructive migrations or write production data;
 - record an unpushed SHA as a merged PR or Candidate SHA;
 - fabricate, omit, or carry forward verification evidence.
 
-A human performs push, PR, review, merge, Candidate, and release operations in `RUNBOOK.md`.
+A human performs push, PR, verification review, merge, Candidate, and release operations in `RUNBOOK.md`. The same human may author and merge a PR; a separate reviewer account is not required. This does not authorize an agent to merge.
 
 ## 8. Stop conditions and staleness
 

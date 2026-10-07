@@ -1,0 +1,45 @@
+schema_version: 1
+change_id: CHG-PILOT-SETUP-001
+state: approved
+plan_base_sha: 0a2512a0192a1e81a30086457853e4dd3d08aa01
+plan_merge_sha: pending
+work_units:
+  - id: setup-readiness
+    repo: root
+    state: ready
+    goal: Prepare a single-account pilot without file-owner or separate reviewer approval.
+    branch: fix/CHG-PILOT-SETUP-001/setup-readiness
+    base_sha: 0a2512a0192a1e81a30086457853e4dd3d08aa01
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-SETUP-001/**
+      - changes/_TEMPLATE/PLAN.md
+      - .github/CODEOWNERS
+      - scripts/orchestration/server.mjs
+      - scripts/orchestration/change-service.mjs
+      - scripts/init-project.mjs
+      - scripts/service-add.mjs
+      - scripts/verify-prs.mjs
+      - scripts/verify-setup-pointers.mjs
+      - scripts/ci-candidate-check.mjs
+      - tests/pilot-anchor.test.mjs
+      - tests/pilot-limit.test.mjs
+      - tests/single-account.test.mjs
+      - tests/setup-pointers.test.mjs
+      - tests/coordination-v2.test.mjs
+      - tests/ci-workflow.test.mjs
+      - tests/scripts.test.mjs
+      - ui/app.js
+      - ui/index.html
+      - AGENTS.md
+      - README.md
+      - RUNBOOK.md
+      - WRITER.md
+      - PILOT.md
+      - services/pilot-front
+      - services/pilot-back
+    depends_on: []
+    verify:
+      - npm test
+      - npm run test:ui
+      - npm run verify:registry -- --strict

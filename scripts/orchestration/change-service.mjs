@@ -77,14 +77,17 @@ export function normalizeDraft(input = {}) {
     title: text(input.title) || 'Primary goal',
     outcome: text(input.goal),
   }] : []);
+  const generatedIdCounts = new Map();
   const workUnits = Array.isArray(input.workUnits) ? input.workUnits.map((raw, index) => {
-    const baseId = text(raw.id) || slug(raw.service || raw.goal || `work-${index + 1}`);
-    const priorGeneratedIds = input.workUnits.slice(0, index)
-      .filter((candidate) => !text(candidate.id))
-      .map((candidate) => slug(candidate.service || candidate.goal || 'work'));
-    const occurrence = priorGeneratedIds.filter((id) => id === baseId).length + 1;
+    const explicitId = text(raw.id);
+    const baseId = explicitId || slug(raw.service || raw.goal || `work-${index + 1}`);
+    const occurrence = (generatedIdCounts.get(baseId) ?? 0) + 1;
+    if (!explicitId) {
+      const countedId = slug(raw.service || raw.goal || 'work');
+      generatedIdCounts.set(countedId, (generatedIdCounts.get(countedId) ?? 0) + 1);
+    }
     const suffix = occurrence > 1 ? `-${occurrence}` : '';
-    const id = text(raw.id) || `${baseId.slice(0, 128 - suffix.length)}${suffix}`;
+    const id = explicitId || `${baseId.slice(0, 128 - suffix.length)}${suffix}`;
     return {
       id,
       goalId: text(raw.goalId) || goals[0]?.id || '',
@@ -273,7 +276,7 @@ function planMarkdown(draft, rootHead, approval) {
   const nonGoals = draft.noNonGoals ? '- None declared for this Change.' : draft.nonGoals.map((item) => `- ${item}`).join('\n');
   const userFlow = draft.hasUserFlow ? `\n\n## User flow\n\n${draft.userFlow.map((item, index) => `${index + 1}. ${item}`).join('\n')}` : '';
   const contractSummary = draft.noSharedContract ? 'none' : draft.contracts.map(({ name, serviceIds }) => `\`contracts/${name}\` (${serviceIds.join(' ↔ ')})`).join(', ');
-  return `# ${draft.changeId} — ${draft.title}\n\n## State\n\n- Status: ${approval === 'approved' ? 'APPROVED' : 'DRAFT'}\n- Coordinator: ${draft.coordinator}\n- Required approvers: product owner, service owner, independent reviewer\n- Plan base: ${rootHead}\n- Tracking: none\n\n## Goals\n\n${goalLines}\n\n## Non-goals\n\n${nonGoals}${userFlow}\n\n## Acceptance criteria\n\n${draft.acceptanceCriteria.map((item, index) => `- [AC-${String(index + 1).padStart(3, '0')}] ${item}`).join('\n')}\n\n## Contracts\n\n- Shared snapshots: ${contractSummary}\n- Compatibility/migration: none unless explicitly stated in a contract snapshot\n\n## Order\n\n- Merge order: dependency order recorded in WORK_UNITS.yaml\n- Deploy order: decided during Candidate integration\n- Activation: none unless added by an approved plan amendment\n\n## Risks\n\n- Concurrent path ownership or contract ambiguity blocks approval readiness.\n\n## Rollback\n\n| Item | Plan |\n|---|---|\n| Trigger | An acceptance criterion or approved contract cannot be satisfied |\n| Owner | Coordinator and affected service owner |\n| Kill switch | Defined before deployment when applicable |\n| Code recovery | Revert or roll forward from exact merge SHAs |\n| Data recovery | Not applicable unless added by an approved plan amendment |\n| Verification | Re-run all declared checks and Candidate verification |\n\n## Stop conditions\n\n- A contract, scope, base SHA, dependency, or required verification must change.\n- Secret, production, destructive, or undeclared repository access is required.\n`;
+  return `# ${draft.changeId} — ${draft.title}\n\n## State\n\n- Status: ${approval === 'approved' ? 'APPROVED' : 'DRAFT'}\n- Coordinator: ${draft.coordinator}\n- Human merger: ${draft.coordinator} (may also author the PR)\n- Plan base: ${rootHead}\n- Tracking: none\n\n## Goals\n\n${goalLines}\n\n## Non-goals\n\n${nonGoals}${userFlow}\n\n## Acceptance criteria\n\n${draft.acceptanceCriteria.map((item, index) => `- [AC-${String(index + 1).padStart(3, '0')}] ${item}`).join('\n')}\n\n## Contracts\n\n- Shared snapshots: ${contractSummary}\n- Compatibility/migration: none unless explicitly stated in a contract snapshot\n\n## Order\n\n- Merge order: dependency order recorded in WORK_UNITS.yaml\n- Deploy order: decided during Candidate integration\n- Activation: none unless added by an approved plan amendment\n\n## Risks\n\n- Concurrent path ownership or contract ambiguity blocks approval readiness.\n\n## Rollback\n\n| Item | Plan |\n|---|---|\n| Trigger | An acceptance criterion or approved contract cannot be satisfied |\n| Owner | Coordinator and affected service owner |\n| Kill switch | Defined before deployment when applicable |\n| Code recovery | Revert or roll forward from exact merge SHAs |\n| Data recovery | Not applicable unless added by an approved plan amendment |\n| Verification | Re-run all declared checks and Candidate verification |\n\n## Stop conditions\n\n- A contract, scope, base SHA, dependency, or required verification must change.\n- Secret, production, destructive, or undeclared repository access is required.\n`;
 }
 
 export function buildChangeFiles(input, context) {

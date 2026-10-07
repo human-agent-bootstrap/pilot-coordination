@@ -439,7 +439,6 @@ test('init removes the template\'s own change records but keeps the skeleton', (
     writeFileSync(join(dir, 'changes/_TEMPLATE/PLAN.md'), '# <CHANGE-ID>\n');
     writeFileSync(join(dir, 'changes/CHG-OWN-001/PLAN.md'), '# CHG-OWN-001\n');
     writeFileSync(join(dir, 'services/registry.yaml'), 'version: 2\ngithub:\n  host: <GITHUB-HOST>\n  api_base: <GITHUB-API-BASE>\nservices: []\n');
-    writeFileSync(join(dir, '.github/CODEOWNERS'), '/changes/ <COORDINATOR-OWNER>\n');
     writeFileSync(join(dir, '.gitmodules'), '');
     writeFileSync(join(dir, 'README.md'), '# <PROJECT-NAME>\nclone https://<GITHUB-HOST>/<ORG>/<PROJECT-NAME>.git\n');
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: '<PROJECT-NAME>', scripts: { test: 'x' } }, null, 2));
@@ -447,7 +446,6 @@ test('init removes the template\'s own change records but keeps the skeleton', (
     const result = run('init-project.mjs', [
       '--name', 'acme-coord',
       '--org', 'acme',
-      '--coordinator-owner', '@acme/coordination',
       '--github-host', 'github.com',
       '--apply',
     ], dir);
@@ -456,7 +454,7 @@ test('init removes the template\'s own change records but keeps the skeleton', (
     assert.match(readFileSync(join(dir, 'README.md'), 'utf8'), /acme-coord/);
     assert.doesNotMatch(readFileSync(join(dir, 'README.md'), 'utf8'), /<PROJECT-NAME>|<ORG>|<GITHUB-HOST>/);
     assert.match(readFileSync(join(dir, 'services/registry.yaml'), 'utf8'), /api_base: https:\/\/api\.github\.com/);
-    assert.equal(readFileSync(join(dir, '.github/CODEOWNERS'), 'utf8'), '/changes/ @acme/coordination\n');
+    assert.equal(existsSync(join(dir, '.github/CODEOWNERS')), false);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 

@@ -1,0 +1,17 @@
+schema_version: 1
+change_id: CHG-PILOT-SETUP-001
+prs:
+  - key: pilot-front-metadata
+    repo: pilot-front
+    number: 1
+    state: merged
+    base_sha: f51d6ec14e7d67dec4fa544a2717d15a15170fea
+    head_sha: 47284c087aafb9c9fc75f0dddf6650df1e346fbe
+    merge_sha: d416160632332c77b0562b5132aa67c1b79d7954
+  - key: pilot-back-metadata
+    repo: pilot-back
+    number: 1
+    state: merged
+    base_sha: cd601d0564c8c8a76258f2a9e7bf44149ff34ed5
+    head_sha: d8a6ad28eda1cf1264f3599787c8715739763501
+    merge_sha: 912cbe13b7378ce237770f3b5b9b5d08d668eff6

@@ -20,12 +20,12 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 26
           cache: npm
@@ -35,19 +35,33 @@ jobs:
       - run: git checkout -B "${{ github.head_ref }}"
       - run: node scripts/ci-workflow-check.mjs --branch "${{ github.head_ref }}"
 
+  planning-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci --include=dev --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+
   main:
     if: github.event_name == 'push'
-    # Only trusted main code receives private-repository credentials or runs inside
-    # the corporate network.
-    runs-on: [self-hosted, linux]
+    # Public pilot repositories need no corporate runner or private-repository secret.
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: recursive
           fetch-depth: 0
-          token: ${{ secrets.COORDINATION_GITHUB_TOKEN || github.token }}
+          token: ${{ github.token }}
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 26
           cache: npm
@@ -55,5 +69,5 @@ jobs:
       - run: npm test
       - run: npm run verify:registry -- --strict
       - env:
-          COORDINATION_GITHUB_TOKEN: ${{ secrets.COORDINATION_GITHUB_TOKEN }}
-        run: npm run verify:candidate:ci -- --event push --before "${{ github.event.before }}" --after "${{ github.sha }}"
+          COORDINATION_GITHUB_TOKEN: ${{ github.token }}
+        run: npm run verify:candidate:ci -- --event push --before "${{ github.event.before }}" --after "${{ github.sha }}" --allow-initial-registration true

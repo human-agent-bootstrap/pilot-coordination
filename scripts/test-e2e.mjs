@@ -7,7 +7,7 @@ try {
   const directory = join(process.cwd(), 'e2e');
   const files = existsSync(directory)
     ? readdirSync(directory)
-      .filter((name) => name.endsWith('.test.mjs'))
+      .filter((name) => name.endsWith('.test.mjs') && name !== 'orchestration-ui.test.mjs')
       .sort()
       .map((name) => join('e2e', name))
     : [];

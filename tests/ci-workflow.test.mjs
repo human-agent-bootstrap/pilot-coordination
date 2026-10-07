@@ -27,7 +27,7 @@ test('pull requests run untrusted code without private credentials', () => {
 });
 
 test('trusted main pushes run remote candidate verification', () => {
-  assert.match(mainJob, /runs-on: \[self-hosted, linux\]/);
+  assert.match(mainJob, /runs-on: ubuntu-latest/);
   assert.match(mainJob, /submodules: recursive/);
   assert.match(mainJob, /verify:candidate:ci -- --event push/);
   assert.match(mainJob, /COORDINATION_GITHUB_TOKEN/);
@@ -43,9 +43,10 @@ test('root CI assumes no service stack', () => {
   assert.doesNotMatch(workflow, /uv sync|setup-uv|--prefix services\//);
 });
 
-test('private submodule credentials are not persisted', () => {
+test('public pilot uses only the built-in read token and does not persist credentials', () => {
   assert.match(workflow, /persist-credentials: false/);
-  assert.match(workflow, /secrets\.COORDINATION_GITHUB_TOKEN \|\| github\.token/);
+  assert.match(mainJob, /token: \$\{\{ github\.token \}\}/);
+  assert.doesNotMatch(workflow, /secrets\./);
 });
 
 test('final candidates run E2E when a suite is present', () => {

@@ -1,0 +1,6 @@
+[submodule "services/pilot-front"]
+	path = services/pilot-front
+	url = https://github.com/human-agent-bootstrap/pilot-front.git
+[submodule "services/pilot-back"]
+	path = services/pilot-back
+	url = https://github.com/human-agent-bootstrap/pilot-back.git

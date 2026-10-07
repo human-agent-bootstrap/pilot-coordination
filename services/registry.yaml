@@ -1,5 +1,19 @@
 version: 2
 github:
-  host: <GITHUB-HOST>
-  api_base: <GITHUB-API-BASE>
-services: []
+  host: github.com
+  api_base: https://api.github.com
+services:
+  - id: pilot-front
+    path: services/pilot-front
+    repo: https://github.com/human-agent-bootstrap/pilot-front.git
+    stack: react-typescript
+    owners:
+      - "@whdvlf94"
+    verify: []
+  - id: pilot-back
+    path: services/pilot-back
+    repo: https://github.com/human-agent-bootstrap/pilot-back.git
+    stack: fastapi-sqlite
+    owners:
+      - "@whdvlf94"
+    verify: []

@@ -1,0 +1,31 @@
+{
+  "name": "<PROJECT-NAME>",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Coordination root for agent-assisted multi-repository work.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:ui": "playwright test e2e/orchestration-ui.test.mjs --reporter=line",
+    "ui": "node scripts/orchestration-server.mjs",
+    "init": "node scripts/init-project.mjs",
+    "service:add": "node scripts/service-add.mjs",
+    "change:create": "node scripts/change-create.mjs",
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "workflow:check": "node scripts/ci-workflow-check.mjs --branch-from-git",
+    "verify:registry": "node scripts/verify-registry.mjs",
+    "verify:prs": "node scripts/verify-prs.mjs",
+    "verify:candidate": "node scripts/verify-candidate.mjs",
+    "verify:candidate:ci": "node scripts/ci-candidate-check.mjs",
+    "test:e2e": "node scripts/test-e2e.mjs",
+    "writer": "node scripts/writer.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  },
+  "dependencies": {
+    "yaml": "^2.9.1"
+  }
+}

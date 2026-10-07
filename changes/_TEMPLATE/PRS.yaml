@@ -1,0 +1,32 @@
+schema_version: 1
+change_id: <CHANGE-ID>
+state: draft
+plan_merge_sha: pending
+prs:
+  - key: root-planning
+    repo: root
+    work_unit: contract-and-plan
+    number: null
+    state: not-started
+    base_sha: <ROOT_BASE_SHA>
+    head_sha: null
+    merge_sha: null
+
+  - key: <service-id>-implementation
+    repo: <service-id>
+    work_unit: <service-id>-implementation
+    number: null
+    state: not-started
+    base_sha: <SERVICE_BASE_SHA>
+    head_sha: null
+    merge_sha: null
+    merge_method: squash
+
+  - key: root-candidate
+    repo: root
+    work_unit: candidate-integration
+    number: null
+    state: not-started
+    base_sha: pending-plan-merge
+    head_sha: null
+    merge_sha: null

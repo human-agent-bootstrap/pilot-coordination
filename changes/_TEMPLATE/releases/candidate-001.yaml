@@ -1,0 +1,18 @@
+schema_version: 1
+change_id: <CHANGE-ID>
+candidate: 1
+state: draft
+plan_sha: pending-planning-merge
+services:
+  - repo: <service-id>
+    path: services/<service-id>
+    base_sha: <SERVICE_BASE_SHA>
+    sha: pending-human-approved-merge
+    source_prs:
+      - <service-id>-implementation
+evidence:
+  - criterion: AC-001
+    kind: command
+    command: <exact command>
+    target_sha: <SERVICE_MERGE_SHA>
+    exit_code: 0

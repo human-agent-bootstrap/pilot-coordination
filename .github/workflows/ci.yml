@@ -1,0 +1,59 @@
+name: Coordination validation
+
+# The root validates coordination state only: manifests, ownership, scope, and the
+# exact-SHA candidate. Per-service build and test belong to each service repository's
+# own CI — this workflow cannot know your services' stacks. To run a cross-repo
+# browser E2E here, add root-level tests under e2e/ and the setup steps your
+# services' stacks need.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pull-request:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run verify:registry -- --strict --allow-uninitialized
+      - run: git checkout -B "${{ github.head_ref }}"
+      - run: node scripts/ci-workflow-check.mjs --branch "${{ github.head_ref }}"
+
+  main:
+    if: github.event_name == 'push'
+    # Only trusted main code receives private-repository credentials or runs inside
+    # the corporate network.
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.COORDINATION_GITHUB_TOKEN || github.token }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run verify:registry -- --strict
+      - env:
+          COORDINATION_GITHUB_TOKEN: ${{ secrets.COORDINATION_GITHUB_TOKEN }}
+        run: npm run verify:candidate:ci -- --event push --before "${{ github.event.before }}" --after "${{ github.sha }}"

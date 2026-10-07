@@ -1,0 +1,52 @@
+schema_version: 1
+change_id: <CHANGE-ID>
+state: draft
+plan_base_sha: <ROOT_BASE_SHA>
+plan_merge_sha: pending
+work_units:
+  - id: contract-and-plan
+    repo: root
+    state: draft
+    goal: Approve the scope, contracts, work boundaries, and verification gates.
+    branch: change/<CHANGE-ID>/coordination
+    base_sha: <ROOT_BASE_SHA>
+    writer: coordinator
+    write_paths:
+      - changes/<CHANGE-ID>/**
+    depends_on: []
+    verify:
+      - npm test
+      - npm run verify:registry -- --change <CHANGE-ID> --strict
+
+  - id: <service-id>-implementation
+    repo: <service-id>
+    state: draft
+    goal: <implement the service slice>
+    branch: feat/<CHANGE-ID>/<service-id>-implementation
+    base_sha: <SERVICE_BASE_SHA>
+    writer: unassigned
+    write_paths: []
+    depends_on:
+      - contract-and-plan
+    verify: []
+
+  - id: candidate-integration
+    repo: root
+    state: draft
+    goal: Pin reviewed service merge SHAs and verify the exact candidate.
+    branch: change/<CHANGE-ID>/candidate-integration
+    base_sha: pending-plan-merge
+    writer: coordinator
+    write_paths:
+      - changes/<CHANGE-ID>/WORK_UNITS.yaml
+      - changes/<CHANGE-ID>/PRS.yaml
+      - changes/<CHANGE-ID>/STATUS.md
+      - changes/<CHANGE-ID>/releases/**
+      - e2e/**
+      - services/<service-id>
+    depends_on:
+      - <service-id>-implementation
+    verify:
+      - npm test
+      - npm run verify:prs -- --change <CHANGE-ID>
+      - npm run verify:candidate -- --change <CHANGE-ID> --target-ref origin/main

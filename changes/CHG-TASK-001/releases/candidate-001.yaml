@@ -1,0 +1,19 @@
+schema_version: 1
+change_id: CHG-TASK-001
+candidate: 1
+state: draft
+plan_sha: pending-planning-merge
+services:
+  - repo: pilot-front
+    path: services/pilot-front
+    base_sha: 272160d8fb97b7ab879dae204e3287576225ca6d
+    sha: pending-human-approved-merge
+    source_prs:
+      - pilot-front
+  - repo: pilot-back
+    path: services/pilot-back
+    base_sha: 948127bb168d36e8e89b862e92d4313faee40135
+    sha: pending-human-approved-merge
+    source_prs:
+      - pilot-back
+evidence: []

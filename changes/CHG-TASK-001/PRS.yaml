@@ -6,10 +6,10 @@ prs:
   - key: root-planning
     repo: root
     work_unit: contract-and-plan
-    number: null
-    state: not-started
+    number: 3
+    state: open
     base_sha: a514f041fd0ba799c7cbebcac856371ccd782c71
-    head_sha: null
+    head_sha: 7188adf46574bdd4cf35173998dd164f1d3f9b14
     merge_sha: null
   - key: pilot-front
     repo: pilot-front

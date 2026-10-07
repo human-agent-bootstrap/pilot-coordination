@@ -1,0 +1,23 @@
+schema_version: 1
+change_id: CHG-PILOT-SETUP-001
+state: approved
+plan_base_sha: 0a2512a0192a1e81a30086457853e4dd3d08aa01
+plan_merge_sha: pending
+work_units:
+  - id: setup-readiness
+    repo: root
+    state: ready
+    goal: Allow governance-only service anchors to use the initial implementation scope.
+    branch: fix/CHG-PILOT-SETUP-001/setup-readiness
+    base_sha: 0a2512a0192a1e81a30086457853e4dd3d08aa01
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-SETUP-001/**
+      - scripts/orchestration/server.mjs
+      - tests/pilot-anchor.test.mjs
+      - PILOT.md
+    depends_on: []
+    verify:
+      - npm test
+      - npm run test:ui
+      - npm run verify:registry -- --strict

@@ -1,0 +1,39 @@
+schema_version: 1
+change_id: CHG-TASK-001
+state: approved
+plan_merge_sha: pending
+prs:
+  - key: root-planning
+    repo: root
+    work_unit: contract-and-plan
+    number: null
+    state: not-started
+    base_sha: a514f041fd0ba799c7cbebcac856371ccd782c71
+    head_sha: null
+    merge_sha: null
+  - key: pilot-front
+    repo: pilot-front
+    work_unit: pilot-front
+    number: null
+    state: not-started
+    base_sha: 272160d8fb97b7ab879dae204e3287576225ca6d
+    head_sha: null
+    merge_sha: null
+    merge_method: squash
+  - key: pilot-back
+    repo: pilot-back
+    work_unit: pilot-back
+    number: null
+    state: not-started
+    base_sha: 948127bb168d36e8e89b862e92d4313faee40135
+    head_sha: null
+    merge_sha: null
+    merge_method: squash
+  - key: root-candidate
+    repo: root
+    work_unit: candidate-integration
+    number: null
+    state: not-started
+    base_sha: pending-plan-merge
+    head_sha: null
+    merge_sha: null

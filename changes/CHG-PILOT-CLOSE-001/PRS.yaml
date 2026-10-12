@@ -14,8 +14,16 @@ prs:
   - key: close-flow-followups
     repo: root
     work_unit: close-flow-followups
+    number: 6
+    state: merged
+    base_sha: 0bbdb1e6a764103a2e348795fe6f8dff3390837d
+    head_sha: 097f0a149fa618625c984658042ca66b709c6405
+    merge_sha: 3b792a065587439dd936238ab9e173acbd4224f7
+  - key: closure-base-ancestry
+    repo: root
+    work_unit: closure-base-ancestry
     number: null
     state: not-started
-    base_sha: 0bbdb1e6a764103a2e348795fe6f8dff3390837d
+    base_sha: 1b7dcf2c8227005c3830616da9789b933bb910db
     head_sha: null
     merge_sha: null

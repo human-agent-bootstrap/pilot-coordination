@@ -831,7 +831,7 @@ export function createCandidateService({
     if (!result.ready) reject('아직 마감을 시작할 수 없습니다. 막고 있는 항목을 먼저 해결하세요.');
     return { run: runIdFor(change, result.candidate, takenRunId), revision: result.revision };
   }
-  function closureFiles(approval, state, mergeSha) {
+  function closureFiles(approval, state, mergeSha, base) {
     const prefix = `changes/${approval.change}`;
     const read = (path) => readFileSync(join(state.workspace, path), 'utf8');
     const manifest = YAML.parse(read(`${prefix}/WORK_UNITS.yaml`));
@@ -845,7 +845,7 @@ export function createCandidateService({
       manifest.work_units.push(closure);
     }
     Object.assign(closure, {
-      state: 'merged', base_sha: mergeSha, writer: approval.writer,
+      state: 'merged', base_sha: base, writer: approval.writer,
       write_paths: [`${prefix}/WORK_UNITS.yaml`, `${prefix}/STATUS.md`, `${prefix}/releases/**`],
       depends_on: [approval.unit],
       verify: ['npm test', `npm run verify:registry -- --change ${approval.change} --strict`],
@@ -906,13 +906,18 @@ ${evidence}
     save(state);
     try {
       await command(state, '마감 base 확인', 'git', ['fetch', 'origin', 'main']);
-      if (git(['rev-parse', 'origin/main'], state.workspace) !== mergeSha) reject('Root main이 Candidate 병합 SHA와 다릅니다. 병합 상태를 다시 조회하세요.');
+      // The Candidate merge must really be in main's history. Main moving on past it is
+      // normal — other changes land while a Coordinator checks the integration environment.
+      if (gitResult(['merge-base', '--is-ancestor', mergeSha, 'origin/main'], state.workspace).status !== 0) {
+        reject('Candidate 병합 SHA가 Root main 히스토리에 없습니다. 병합 상태를 다시 조회하세요.');
+      }
+      const base = git(['rev-parse', 'origin/main'], state.workspace);
       const branch = `change/${approval.change}/candidate-closure`;
       if (gitResult(['rev-parse', '--verify', `refs/heads/${branch}`], state.workspace).status !== 0) {
-        await command(state, '마감 브랜치 준비', 'git', ['switch', '-c', branch, mergeSha]);
+        await command(state, '마감 브랜치 준비', 'git', ['switch', '-c', branch, base]);
       } else if (git(['branch', '--show-current'], state.workspace) !== branch) reject('기존 마감 브랜치를 자동 전환하지 않습니다.');
       const allowed = [`changes/${approval.change}/WORK_UNITS.yaml`, `changes/${approval.change}/STATUS.md`, `changes/${approval.change}/releases/**`];
-      const writes = closureFiles(approval, state, mergeSha);
+      const writes = closureFiles(approval, state, mergeSha, base);
       for (const [path, content] of writes) {
         if (!pathsAllow(path, allowed)) reject('마감 기록 경로가 허용 범위 밖입니다.');
         assertPathHasNoSymlinks(state.workspace, path);

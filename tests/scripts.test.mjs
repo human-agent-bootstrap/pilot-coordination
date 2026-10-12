@@ -360,7 +360,7 @@ test('registry verification flags concurrent work units that share write paths',
     writeFileSync(join(dir, 'changes/CHG-FIXTURE-001/WORK_UNITS.yaml'), 'change_id: CHG-FIXTURE-001\nwork_units:\n  - id: story-a\n    repo: front\n    write_paths:\n      - src/**\n    depends_on: []\n  - id: story-b\n    repo: front\n    write_paths:\n      - src/api/sample.ts\n    depends_on: []\n');
     const warn = run('verify-registry.mjs', [], dir);
     assert.equal(warn.status, 0, warn.stderr);
-    assert.match(warn.stdout, /concurrent units story-a and story-b both write/);
+    assert.match(warn.stdout, /concurrent units story-a \(src\/\*\*\) and story-b \(src\/api\/sample\.ts\) overlap in repo front/);
 
     const strict = run('verify-registry.mjs', ['--strict'], dir);
     assert.notEqual(strict.status, 0);
@@ -375,7 +375,10 @@ test('registry verification treats ** as overlapping every path', () => {
     writeFileSync(join(dir, 'changes/CHG-FIXTURE-001/WORK_UNITS.yaml'), 'change_id: CHG-FIXTURE-001\nwork_units:\n  - id: greenfield\n    repo: front\n    write_paths:\n      - "**"\n    depends_on: []\n  - id: feature\n    repo: front\n    write_paths:\n      - src/api/**\n    depends_on: []\n');
     const result = run('verify-registry.mjs', ['--strict'], dir);
     assert.notEqual(result.status, 0);
-    assert.match(result.stdout, /greenfield and feature both write/);
+    // Each path is attributed to the unit that declared it: only greenfield claimed **,
+    // so the warning must not read as if feature claimed it too.
+    assert.match(result.stdout, /greenfield \(\*\*\) and feature \(src\/api\/\*\*\) overlap in repo front/);
+    assert.doesNotMatch(result.stdout, /feature \(\*\*\)/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 

@@ -13,7 +13,8 @@
 
 - Direction: operational.
 - Qualities: precise, calm, trustworthy.
-- Audience: Korean-speaking coordinators facilitating multi-repository planning meetings.
+- Audience: Korean-speaking coordinators facilitating multi-repository planning, exact-SHA Candidate
+  integration and task closure.
 - Signature element: a persistent plan map that shows each stage's validity and the exact next
   decision, with compact generated-ID chips linking goals and Work Units.
 - Avoid: dashboard card grids, decorative gradients, glass effects, oversized marketing copy,
@@ -76,6 +77,29 @@
 - File preview: accessible tabs, a one-sentence role description for the active file, and a
   monospace preformatted panel.
 - Empty states state the next action rather than using placeholder decoration.
+- Closing a task is a separate topbar destination, not an extra planning form step. Reuse the
+  existing achromatic palette and type stack. The pane is a four-row track — collect results,
+  verify integration, confirm acceptance criteria, close — whose shape never changes as the
+  run advances; the engine's execution phases map onto those rows and never surface by name.
+  The Coordinator types no identifiers: candidate number and run id are derived, and selecting
+  the task loads its merge results without a press. Exactly two presses carry a clean run:
+  approving the discovered PR/SHA set, and confirming the evidence. Blocked rows name who must
+  do what, not a state word, and carry one retry in the row that failed. Short SHAs with a copy
+  control in the body; full SHAs, digests, run id, workspace and step records live in one
+  technical disclosure. Row four keeps PR creation, merge, main CI and the human
+  integration-environment confirmation as four distinct statements, and the confirmation is an
+  explicit note plus checkbox — never inferred from the other three. Creating the closure PR is
+  likewise not closure: the row reports the closure PR as awaiting a human merge and only reads
+  as done once that merge is observed on main. Whether product E2E is
+  required is the approved plan's decision, not the tool's: the row blocks on a missing suite
+  only when the plan declares one, and otherwise says nothing about integration it did not
+  verify. A suite that exists always runs even when undeclared, so written evidence is never
+  silently dropped. Declared product E2E, real exit codes and human acceptance-evidence linkage gate
+  publication; the tool's own screen regression suite and optional skips are never product
+  integration evidence. Per-criterion evidence may be suggested
+  but never pre-confirmed, and no bulk confirm is offered. Resume runs from Coordinator records
+  without overwriting approval originals or failed workspaces. While an Agent owns the E2E
+  handoff stage, Coordinator workspace mutations/checks stay locked.
 
 ## 6. Motion and interaction
 

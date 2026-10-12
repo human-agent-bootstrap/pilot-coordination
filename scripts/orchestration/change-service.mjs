@@ -335,7 +335,17 @@ export function buildChangeFiles(input, context) {
           ...serviceIds.map((id) => serviceById.get(id).path),
         ],
         depends_on: implementationUnits.map(({ id }) => id),
-        verify: ['npm test', `npm run verify:prs -- --change ${draft.changeId}`, `npm run verify:candidate -- --change ${draft.changeId} --target-ref origin/main`],
+        verify: ['npm test', `npm run verify:prs -- --change ${draft.changeId}`, 'npm run test:e2e', `npm run verify:candidate -- --change ${draft.changeId} --target-ref origin/main`],
+      },
+      {
+        id: 'candidate-closure', repo: 'root', state: 'draft',
+        goal: 'Record post-merge gate outcomes and close the change.',
+        branch: `change/${draft.changeId}/candidate-closure`, base_sha: 'pending-candidate-merge', writer: draft.coordinator,
+        write_paths: [
+          `changes/${draft.changeId}/WORK_UNITS.yaml`, `changes/${draft.changeId}/STATUS.md`, `changes/${draft.changeId}/releases/**`,
+        ],
+        depends_on: ['candidate-integration'],
+        verify: ['npm test', `npm run verify:registry -- --change ${draft.changeId} --strict`],
       },
     ],
   }));
@@ -349,7 +359,7 @@ export function buildChangeFiles(input, context) {
   }));
   const unitRows = implementationUnits.map((unit) => `| \`${unit.id}\` | \`${unit.goal_id}\` | \`${unit.repo}\` | ${unitStates.get(unit.id)} | Approved planning merge SHA |`).join('\n');
   const scopeSummary = draft.goals.map(({ id, title, outcome }) => `${id} ${title}: ${outcome}`).join(' ');
-  files.set('STATUS.md', `# Status — ${draft.changeId}\n\n**State:** ${approval === 'approved' ? 'APPROVED' : 'DRAFT'}\n\n## Scope\n\n${scopeSummary} Non-goals: ${draft.noNonGoals ? 'none' : draft.nonGoals.join(' ')}\n\n## Work units\n\n| Work unit | Goal | Repository | State | Gate |\n|---|---|---|---|---|\n| \`contract-and-plan\` | all | Root | in_progress | Human plan and contract approval |\n${unitRows}\n| \`candidate-integration\` | all | Root | draft | Service PRs reviewed and human-merged |\n\n## Evidence boundary\n\n- Root base SHA: \`${rootHead}\`\n- Service base SHAs: see \`WORK_UNITS.yaml\`\n- No implementation has started.\n- No implementation agent has been dispatched.\n- No candidate, release, or deployment claim exists yet.\n\n## Next gate\n\nA human reviews and approves the Root planning PR. Its merge SHA becomes the immutable plan version supplied to participating Writers.\n`);
+  files.set('STATUS.md', `# Status — ${draft.changeId}\n\n**State:** ${approval === 'approved' ? 'APPROVED' : 'DRAFT'}\n\n## Scope\n\n${scopeSummary} Non-goals: ${draft.noNonGoals ? 'none' : draft.nonGoals.join(' ')}\n\n## Work units\n\n| Work unit | Goal | Repository | State | Gate |\n|---|---|---|---|---|\n| \`contract-and-plan\` | all | Root | in_progress | Human plan and contract approval |\n${unitRows}\n| \`candidate-integration\` | all | Root | draft | Service PRs reviewed and human-merged |\n| \`candidate-closure\` | all | Root | draft | Candidate merged, main CI and integration environment confirmed |\n\n## Evidence boundary\n\n- Root base SHA: \`${rootHead}\`\n- Service base SHAs: see \`WORK_UNITS.yaml\`\n- No implementation has started.\n- No implementation agent has been dispatched.\n- No candidate, release, or deployment claim exists yet.\n\n## Next gate\n\nA human reviews and approves the Root planning PR. Its merge SHA becomes the immutable plan version supplied to participating Writers.\n`);
   files.set('releases/candidate-001.yaml', yaml({
     schema_version: 1, change_id: draft.changeId, candidate: 1, state: 'draft', plan_sha: 'pending-planning-merge',
     services: serviceIds.map((id) => {

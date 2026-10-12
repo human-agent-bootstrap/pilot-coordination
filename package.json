@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "test:ui": "playwright test e2e/orchestration-ui.test.mjs --reporter=line",
+    "test:ui": "playwright test tests-ui/orchestration-ui.test.mjs --reporter=line",
     "ui": "node scripts/orchestration-server.mjs",
     "init": "node scripts/init-project.mjs",
     "service:add": "node scripts/service-add.mjs",

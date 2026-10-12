@@ -1,6 +1,8 @@
 import { execFileSync, spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { fail, parseArgs, readChangeManifest, readRegistry, required } from './lib.mjs';
+import { fail, parseArgs, readChangeManifest, readRegistry, required, sha256 } from './lib.mjs';
+import { validateCandidateApproval } from './candidate-approval.mjs';
 
 function git(args, cwd) {
   return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
@@ -29,6 +31,26 @@ try {
     throw new Error('--plan-sha is required for implementation work units');
   }
   const repoPath = resolve(process.cwd(), options['repo-path'] || '.');
+  if (options['candidate-approval']) {
+    if (unit.repo !== 'root') throw new Error('Candidate approval cannot authorize a service work unit');
+    const { approval, state } = validateCandidateApproval(options['candidate-approval'], {
+      cwd: repoPath, change: options.change, unit: options.unit, planSha: options['plan-sha'],
+      agent: options['candidate-role'] === 'agent',
+    });
+    if (unit.branch !== approval.branch || JSON.stringify(unit.write_paths) !== JSON.stringify(approval.writePaths)
+      || JSON.stringify(unit.verify) !== JSON.stringify(approval.verify)) throw new Error('Candidate approval cannot widen approved plan scope or checks');
+    if (options['expected-branch'] && options['expected-branch'] !== approval.branch) throw new Error('Candidate approval cannot change its declared branch');
+    unit.base_sha = approval.baseSha;
+    if (options['candidate-role'] === 'agent') {
+      unit.base_sha = state.agentBaseline.head;
+      unit.write_paths = ['e2e/**'];
+      // Coordinator records may be pending at agent dispatch; their baseline hashes are fixed.
+      const protectedPaths = state.agentBaseline.files;
+      for (const entry of protectedPaths) {
+        if (sha256(readFileSync(resolve(repoPath, entry.path))) !== entry.digest) throw new Error('Agent changed Coordinator-owned files');
+      }
+    }
+  }
   const branch = git(['branch', '--show-current'], repoPath);
   const expectedBranch = options['expected-branch'] || unit.branch;
   if (branch !== expectedBranch) throw new Error(`branch mismatch: expected ${expectedBranch}, found ${branch || '(detached HEAD)'}`);
@@ -45,7 +67,14 @@ try {
     ...lines(git(['diff', '--name-only'], repoPath)),
     ...lines(git(['ls-files', '--others', '--exclude-standard'], repoPath)),
   ])];
-  const outside = changed.filter((path) => !unit.write_paths.some((allowed) => allows(path, allowed)));
+  let outside = changed.filter((path) => !unit.write_paths.some((allowed) => allows(path, allowed)));
+  if (options['candidate-role'] === 'agent' && options['candidate-approval']) {
+    const { state } = validateCandidateApproval(options['candidate-approval'], {
+      cwd: repoPath, change: options.change, unit: options.unit, planSha: options['plan-sha'], agent: true,
+    });
+    const baseline = new Set([...state.agentBaseline.files.map((entry) => entry.path), ...state.agentBaseline.pointers]);
+    outside = outside.filter((path) => !baseline.has(path));
+  }
   if (outside.length) throw new Error(`scope violation: ${outside.join(', ')}`);
   process.stdout.write(`Workflow check PASS: ${options.change}/${unit.id}; base ${unit.base_sha}; ${changed.length} changed file(s).\n`);
 } catch (error) {

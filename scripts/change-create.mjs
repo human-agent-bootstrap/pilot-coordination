@@ -155,10 +155,34 @@ try {
             ...services.map((service) => service.path),
           ],
           depends_on: serviceUnits.map((unit) => unit.id),
+          // Declaring test:e2e here is what makes product integration evidence
+          // required for this change; drop it for changes that need none.
           verify: [
             'npm test',
             `npm run verify:prs -- --change ${changeId}`,
+            'npm run test:e2e',
             `npm run verify:candidate -- --change ${changeId} --target-ref origin/main`,
+          ],
+        },
+        {
+          id: 'candidate-closure',
+          repo: 'root',
+          state: 'draft',
+          goal: 'Record post-merge gate outcomes and close the change.',
+          branch: `change/${changeId}/candidate-closure`,
+          base_sha: 'pending-candidate-merge',
+          writer: 'coordinator',
+          // main CI and the integration environment cannot be observed before the
+          // candidate merges, so closure is its own branch and its own record.
+          write_paths: [
+            `changes/${changeId}/WORK_UNITS.yaml`,
+            `changes/${changeId}/STATUS.md`,
+            `changes/${changeId}/releases/**`,
+          ],
+          depends_on: ['candidate-integration'],
+          verify: [
+            'npm test',
+            `npm run verify:registry -- --change ${changeId} --strict`,
           ],
         },
       ],

@@ -15,6 +15,7 @@ import { extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import YAML from 'yaml';
 import { createPlanPr } from './plan-pr.mjs';
+import { createCandidateService } from './candidate.mjs';
 import { assertPathHasNoSymlinks, buildChangeFiles, managedDraftContractPaths, normalizeDraft, recoverChangeWrites, saveChange, validateDraft } from './change-service.mjs';
 
 const moduleRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -650,6 +651,7 @@ function staticFile(pathname) {
   const allowed = new Map([
     ['/app.js', 'app.js'],
     ['/styles.css', 'styles.css'],
+    ['/candidate.js', 'candidate.js'],
   ]);
   return allowed.get(pathname);
 }
@@ -666,15 +668,40 @@ export function createOrchestrationServer({
   uiRoot = join(moduleRoot, 'ui'),
   token = randomBytes(24).toString('hex'),
   planPr,
+  candidate,
 } = {}) {
   const resolvedRoot = resolve(root);
   const planning = planPr ?? createPlanPr({ root: resolvedRoot });
+  // Instantiate lazily: planning fixtures need no registry until a Candidate is opened.
+  let candidates = candidate;
   const server = createServer(async (request, response) => {
     try {
       if (!allowedRequestOrigin(request)) {
         return json(response, 403, { error: '로컬 요청만 허용합니다.' });
       }
       const url = new URL(request.url, 'http://127.0.0.1');
+      if (url.pathname.startsWith('/api/candidate/')) {
+        if (!tokenMatches(request, token)) return json(response, 403, { error: '서버 시작 시 출력된 세션 주소로 접속하세요.' });
+        candidates ??= createCandidateService({ root: resolvedRoot });
+        if (request.method === 'GET' && url.pathname === '/api/candidate/status') {
+          return json(response, 200, candidates.status(url.searchParams.get('run')));
+        }
+        if (request.method === 'POST') {
+          const action = url.pathname.slice('/api/candidate/'.length);
+          const body = await readJson(request);
+          const fields = {
+            preview: ['change', 'candidate', 'selections'], approve: ['revision', 'run'],
+            start: ['change'], evidence: ['run', 'links'], close: ['run', 'environment'],
+            prepare: ['run'], packet: ['run'], handoff: ['run'], verify: ['run'], pr: ['run'], 'remote-status': ['run'],
+          }[action];
+          if (!fields || !body || Array.isArray(body) || Object.keys(body).some((key) => !fields.includes(key))) {
+            return json(response, 422, { error: '지원하지 않는 Candidate 입력입니다. 명령·경로·SHA는 승인 계획에서 읽습니다.' });
+          }
+          const result = await candidates.perform(action, body);
+          return json(response, result.job?.running ? 202 : 200, result);
+        }
+        return json(response, 404, { error: '지원하지 않는 Candidate 작업입니다.' });
+      }
       if (request.method === 'GET' && url.pathname === '/api/status') {
         return json(response, 200, repositoryContext(resolvedRoot));
       }

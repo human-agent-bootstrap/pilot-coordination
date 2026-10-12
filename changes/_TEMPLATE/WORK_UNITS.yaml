@@ -49,4 +49,24 @@ work_units:
     verify:
       - npm test
       - npm run verify:prs -- --change <CHANGE-ID>
+      # Declaring test:e2e makes product integration evidence required for this
+      # change. Remove it when the change needs no cross-service verification.
+      - npm run test:e2e
       - npm run verify:candidate -- --change <CHANGE-ID> --target-ref origin/main
+
+  - id: candidate-closure
+    repo: root
+    state: draft
+    goal: Record post-merge gate outcomes and close the change.
+    branch: change/<CHANGE-ID>/candidate-closure
+    base_sha: pending-candidate-merge
+    writer: coordinator
+    write_paths:
+      - changes/<CHANGE-ID>/WORK_UNITS.yaml
+      - changes/<CHANGE-ID>/STATUS.md
+      - changes/<CHANGE-ID>/releases/**
+    depends_on:
+      - candidate-integration
+    verify:
+      - npm test
+      - npm run verify:registry -- --change <CHANGE-ID> --strict

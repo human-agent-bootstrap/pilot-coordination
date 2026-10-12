@@ -1,0 +1,53 @@
+schema_version: 1
+change_id: CHG-PILOT-CLOSE-001
+state: approved
+plan_base_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
+plan_merge_sha: pending
+work_units:
+  - id: close-flow
+    repo: root
+    state: in_progress
+    goal: Make closing a change a one-screen, two-decision flow and record closure as verifiable state.
+    branch: feat/CHG-PILOT-CLOSE-001/close-flow
+    base_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-CLOSE-001/**
+      - changes/_TEMPLATE/WORK_UNITS.yaml
+      - scripts/candidate-approval.mjs
+      - scripts/change-create.mjs
+      - scripts/github.mjs
+      - scripts/orchestration-server.mjs
+      - scripts/orchestration/candidate.mjs
+      - scripts/orchestration/change-service.mjs
+      - scripts/orchestration/server.mjs
+      - scripts/test-e2e.mjs
+      - scripts/verify-candidate.mjs
+      - scripts/verify-prs.mjs
+      - scripts/verify-registry.mjs
+      - scripts/workflow-check.mjs
+      - tests/candidate.test.mjs
+      - tests/coordination-v2.test.mjs
+      - tests/product-e2e-runner.test.mjs
+      - tests/scripts.test.mjs
+      - tests-ui/**
+      - e2e/orchestration-ui.test.mjs
+      - e2e/README.md
+      - ui/app.js
+      - ui/candidate.js
+      - ui/DESIGN.md
+      - ui/index.html
+      - ui/styles.css
+      - .github/pull_request_template.md
+      - package.json
+      - AGENTS.md
+      - PILOT.md
+      - README.md
+      - RUNBOOK.md
+      - TESTING.md
+      - WRITER.md
+    depends_on: []
+    verify:
+      - npm test
+      - npm run test:ui
+      - npm run verify:registry -- --strict

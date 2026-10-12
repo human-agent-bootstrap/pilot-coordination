@@ -10,8 +10,9 @@ const state = {
 
 function readToken() {
   const match = location.hash.match(/token=([A-Za-z0-9_-]+)/);
-  if (!match) return '';
+  if (!match) return sessionStorage.getItem('coordination-session-token') ?? '';
   history.replaceState(null, '', `${location.pathname}${location.search}`);
+  sessionStorage.setItem('coordination-session-token', match[1]);
   return match[1];
 }
 
@@ -1227,3 +1228,6 @@ form.addEventListener('change', ({ target }) => {
 addGoal();
 refreshStepAvailability();
 loadStatus().catch((error) => showMessage(error.message));
+
+import { initializeCandidate } from './candidate.js';
+initializeCandidate({ token: state.token });

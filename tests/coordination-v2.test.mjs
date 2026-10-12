@@ -336,7 +336,7 @@ work_units:
     writeFileSync(join(dir, 'changes/CHG-B/WORK_UNITS.yaml'), manifest('CHG-B', 'src/api/**'));
     const blocked = run('verify-registry.mjs', ['--strict'], dir);
     assert.notEqual(blocked.status, 0);
-    assert.match(blocked.stdout, /CHG-A\/api-work and CHG-B\/api-work/);
+    assert.match(blocked.stdout, /CHG-A\/api-work \(src\/\*\*\) and CHG-B\/api-work \(src\/api\/\*\*\) overlap in repo api/);
 
     writeFileSync(join(dir, 'changes/CHG-A/WORK_UNITS.yaml'), manifest('CHG-A', 'src/**', 'merged'));
     const released = run('verify-registry.mjs', ['--strict'], dir);

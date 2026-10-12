@@ -1,6 +1,6 @@
 schema_version: 1
 change_id: CHG-TASK-001
-state: approved
+state: complete
 plan_base_sha: a514f041fd0ba799c7cbebcac856371ccd782c71
 plan_merge_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
 work_units:
@@ -53,7 +53,7 @@ work_units:
       - uv run --locked ruff check .
   - id: candidate-integration
     repo: root
-    state: in_progress
+    state: merged
     goal: Pin reviewed service merge SHAs and verify the exact candidate.
     branch: change/CHG-TASK-001/candidate-integration
     base_sha: 624fcfd3745338a81404c9ec399e5c91e8a19c08
@@ -74,3 +74,19 @@ work_units:
       - npm run verify:prs -- --change CHG-TASK-001
       - npm run verify:candidate -- --change CHG-TASK-001 --target-ref
         origin/main
+  - id: candidate-closure
+    repo: root
+    goal: Record post-merge gate outcomes and close the change.
+    branch: change/CHG-TASK-001/candidate-closure
+    state: merged
+    base_sha: 3b792a065587439dd936238ab9e173acbd4224f7
+    writer: jpyoon
+    write_paths:
+      - changes/CHG-TASK-001/WORK_UNITS.yaml
+      - changes/CHG-TASK-001/STATUS.md
+      - changes/CHG-TASK-001/releases/**
+    depends_on:
+      - candidate-integration
+    verify:
+      - npm test
+      - npm run verify:registry -- --change CHG-TASK-001 --strict

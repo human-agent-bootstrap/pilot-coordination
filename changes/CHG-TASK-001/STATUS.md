@@ -1,6 +1,6 @@
 # Status — CHG-TASK-001
 
-**State:** APPROVED
+**State:** COMPLETE
 
 ## Scope
 
@@ -33,3 +33,34 @@ A human reviews and approves the Root planning PR. Its merge SHA becomes the imm
 - Run: run-CHG-TASK-001-candidate-002
 - Approval: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
 - Service PRs: merged and pinned; Candidate PR, main CI and integration environment remain separate human gates.
+
+## Closure
+
+- Plan SHA: `9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9`
+- Candidate PR: #5 merged as `0bbdb1e6a764103a2e348795fe6f8dff3390837d`
+- Service merge SHAs:
+- pilot-front: `ec57ce6b66cca0e6588abc46294f3cf9095e3a83`
+- pilot-back: `08ed728587c4450d58ab93ae00f14bd66da441a4`
+- Acceptance evidence:
+- AC-001: `npm ci --include=dev` exit 0
+- AC-002: `npm ci --include=dev` exit 0
+- AC-003: `npm ci --include=dev` exit 0
+- AC-004: `npm ci --include=dev` exit 0
+- AC-005: `npm ci --include=dev` exit 0
+- AC-005: `npm test` exit 0
+- AC-005: `npm run lint` exit 0
+- AC-005: `npm run typecheck` exit 0
+- AC-005: `npm run build` exit 0
+- AC-005: `uv sync --locked --python 3.12` exit 0
+- AC-005: `uv run --locked pytest` exit 0
+- AC-005: `uv run --locked ruff check .` exit 0
+- AC-006: `npm ci --include=dev` exit 0
+- AC-006: `npm test` exit 0
+- AC-006: `npm run lint` exit 0
+- AC-006: `npm run typecheck` exit 0
+- AC-006: `npm run build` exit 0
+- AC-006: `uv sync --locked --python 3.12` exit 0
+- AC-006: `uv run --locked pytest` exit 0
+- AC-006: `uv run --locked ruff check .` exit 0
+- Gates: Candidate PR created, merged, Root main CI passed, integration environment confirmed by a human.
+- Integration environment: 127.0.0.1:5173에서 고정된 front ec57ce6b·back 08ed7285 조합으로 작업 등록, 새로고침 후 유지, 공백 제목 오류 안내를 사람이 직접 확인했다.

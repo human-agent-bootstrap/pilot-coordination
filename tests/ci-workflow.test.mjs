@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import test from 'node:test';
 
 const workflow = readFileSync(resolve(import.meta.dirname, '../.github/workflows/ci.yml'), 'utf8');
@@ -78,4 +80,31 @@ test('documented local commands resolve to real scripts', () => {
   for (const [, command] of docs.matchAll(/npm run ([A-Za-z0-9:_-]+)/g)) {
     assert.ok(pkg.scripts[command], `missing npm script ${command}`);
   }
+});
+
+test('the browser regression job runs only for pull requests', () => {
+  const job = workflow.slice(workflow.indexOf('  planning-ui:'), workflow.indexOf('\n  main:'));
+  // A consumer committing their own plan should not pay for a Chromium install.
+  assert.match(job, /if: github\.event_name == 'pull_request'/);
+  assert.match(job, /playwright install --with-deps chromium/);
+});
+
+test('the branch gate skips a Root that has no Change yet', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ci-gate-'));
+  try {
+    mkdirSync(join(dir, 'changes/_TEMPLATE'), { recursive: true });
+    const gate = resolve(import.meta.dirname, '../scripts/ci-workflow-check.mjs');
+    // A fresh Root and the template itself: no Change exists, so no branch can map to one.
+    const skipped = spawnSync(process.execPath, [gate, '--branch', 'docs/quickstart-readme'], { cwd: dir, encoding: 'utf8' });
+    assert.equal(skipped.status, 0, skipped.stderr);
+    assert.match(skipped.stdout, /no Change exists yet/);
+
+    // Once a Change exists the gate applies again.
+    mkdirSync(join(dir, 'changes/CHG-REAL-001'), { recursive: true });
+    writeFileSync(join(dir, 'changes/CHG-REAL-001/WORK_UNITS.yaml'),
+      'schema_version: 1\nchange_id: CHG-REAL-001\nstate: draft\nwork_units: []\n');
+    const enforced = spawnSync(process.execPath, [gate, '--branch', 'docs/quickstart-readme'], { cwd: dir, encoding: 'utf8' });
+    assert.notEqual(enforced.status, 0);
+    assert.match(enforced.stderr, /does not identify a Change and work unit/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

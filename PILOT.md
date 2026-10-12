@@ -1,53 +1,54 @@
 # 팀 작업 보드 협업 파일럿
 
-## 실습의 출발점
+`CHG-TASK-001`을 계획부터 마감까지 실제로 돌린 기록입니다. 이 문서는 **그때 무엇을 어떤
+순서로 했는지**를 설명하고, 같은 흐름을 본인 Root에서 재현할 수 있게 합니다.
 
-> 먼저 `CHG-PILOT-SETUP-001` 설정 PR의 CI와 병합 여부를 확인합니다. 이미 병합했다면 다시 진행하지 않습니다. 같은 계정으로 작성·확인·병합할 수 있습니다. 그 다음 `CHG-TASK-001` 계획을 작성하거나 기존 계획의 승인·병합 상태를 확인합니다.
+- **읽기만 할 때** — 각 단계가 무엇을 만들어냈는지 보고, 링크된 실제 산출물과 대조하세요.
+- **따라할 때** — [템플릿](https://github.com/human-agent-bootstrap/coordination-root-template)으로
+  본인 Root를 만들고 서비스 저장소 둘을 연결한 뒤, 아래 시나리오를 그대로 수행하세요.
+  이 저장소의 `CHG-TASK-001`은 이미 닫혀 있어 여기서 다시 돌릴 수 없습니다.
 
-이 문서는 서비스 연결을 마친 Root에서 **계획 → Writer 구현 → 작업 마감 → 사람의 완료 확인**까지 실습하는 안내입니다. 초기 서비스는 README만 있는 상태에서 출발합니다. 실제 진행 상태는 `changes/CHG-TASK-001/`의 기록과 GitHub PR·CI에서 확인합니다. 문서의 예시만으로 계획 승인이나 제품 통합 성공을 주장하지 않습니다.
-
-| 저장소 | 역할 | 예정 스택 |
+| 저장소 | 역할 | 스택 |
 |---|---|---|
-| [pilot-coordination](https://github.com/human-agent-bootstrap/pilot-coordination) | 계획·계약·작업 지시서·Candidate | 이 템플릿 |
+| [pilot-coordination](https://github.com/human-agent-bootstrap/pilot-coordination) | 계획·계약·작업 지시서·Candidate | 이 Root |
 | [pilot-front](https://github.com/human-agent-bootstrap/pilot-front) | 작업 보드 화면 | React + TypeScript + Vite |
 | [pilot-back](https://github.com/human-agent-bootstrap/pilot-back) | API와 저장 | FastAPI + SQLite |
 
-기존 `todo-collab-front`, `todo-collab-back`, 원본 템플릿은 변경하지 않았습니다. 실습은 공개 저장소이고 테스트 데이터만 사용합니다.
-
-## 바로 시작하기
-
-이미 로컬 Root를 준비했다면 해당 디렉터리에서 마지막 두 명령만 실행합니다. `npm run init`이나 서비스 등록을 다시 실행하지 않습니다.
+## 화면 띄워보기
 
 ```bash
 git clone --recurse-submodules https://github.com/human-agent-bootstrap/pilot-coordination.git
-cd pilot-coordination
-npm ci --include=dev
-npm run verify:registry
+cd pilot-coordination && npm ci --include=dev
 npm run ui
 ```
 
-출력된 `http://127.0.0.1:4173/#token=...` 주소를 그대로 엽니다.
+출력된 `http://127.0.0.1:4173/#token=...` 주소를 그대로 엽니다. 계획은 기본 화면에서,
+통합·마감은 상단 **작업 마감**에서 진행합니다.
 
-계획은 기본 화면에서, 서비스 PR 병합 이후 통합은 상단 **작업 마감**에서 진행합니다.
 Candidate 조회에는 기존 GitHub 토큰 환경 변수를 사용하며, 없으면 로컬 `gh api` 인증을
 재사용합니다. 토큰을 추출하거나 UI·Agent에게 전달하지 않습니다. PR 생성에는 `gh`와 Git의
-원격 쓰기 인증도 필요합니다. 자세한 인증 안내는 [RUNBOOK.md](./RUNBOOK.md#네트워크와-자격-증명)를 따릅니다.
+원격 쓰기 인증도 필요합니다. 자세한 안내는 [RUNBOOK.md](./RUNBOOK.md#네트워크와-자격-증명)를 따릅니다.
 
 ## 사람 확인과 병합
 
-별도 리뷰어 계정이나 파일 소유자 승인 제도는 사용하지 않습니다. PR 작성자 본인이 계획·diff·CI·실행 증거를 확인한 뒤 병합할 수 있습니다. GitHub APPROVED review를 요구하지 않습니다.
+이 실습 Root는 **단일 GitHub 계정**으로 돌렸습니다. 별도 리뷰어 계정이나 파일 소유자 승인
+제도를 쓰지 않고, PR 작성자 본인이 계획·diff·CI·실행 증거를 확인한 뒤 병합했습니다.
+팀에서 리뷰어를 두고 싶다면 템플릿의 기본값(CODEOWNERS와 리뷰어 정책)을 그대로 쓰면 됩니다.
 
-Root는 `pull-request`, `planning-ui` 검증을 필수로 유지합니다. force-push와 main 삭제는 금지하며 관리자를 포함해 보호 규칙을 적용합니다. 서비스는 첫 구현에서 실제 CI를 추가하고, 실행된 검사 이름을 확인한 뒤 required checks로 등록합니다. 없는 서비스 CI나 리뷰 승인을 통과 증거로 꾸미지 않습니다.
+Root는 `pull-request`, `planning-ui` 검증을 필수로 유지합니다. force-push와 main 삭제는
+금지하며 관리자를 포함해 보호 규칙을 적용합니다. 서비스는 첫 구현에서 실제 CI를 추가하고,
+실행된 검사 이름을 확인한 뒤 required checks로 등록합니다. 없는 서비스 CI나 리뷰 승인을
+통과 증거로 꾸미지 않습니다.
 
-Agent의 로컬 구현·검증·handoff 경계는 그대로입니다. 사람의 명시적 요청 없는 Agent 병합·배포는 금지합니다. 이번 설정 변경만 사용자가 직접 병합을 요청했습니다. 제품 계획과 구현은 이 승인에 포함되지 않습니다.
-
-이 실습은 작업 분리·계약·SHA·CI·실제 통합 검증을 확인합니다. 독립 사람 리뷰 통제의 검증은 목표에서 제외합니다.
+Agent의 로컬 구현·검증·handoff 경계는 그대로입니다. 사람의 명시적 요청 없는 Agent 병합·배포는
+금지합니다. 이 실습은 작업 분리·계약·SHA·CI·실제 통합 검증을 확인하며, 독립 사람 리뷰 통제의
+검증은 목표에서 제외합니다.
 
 ## Change 1: 작업 등록·조회 (`CHG-TASK-001`)
 
-아래는 실습 계획의 **제안**이지 승인된 작업 지시가 아닙니다. 이미 `changes/CHG-TASK-001/`
-계획이 있으면 다시 입력하지 않고 해당 계획·계약·검증 명령을 확인합니다. 계약·검증·Writer를
-확정하고 계획 PR을 병합해야 구현을 시작할 수 있습니다.
+아래는 이 Change를 계획할 때 세운 **제안**입니다. 계약·검증·Writer를 확정하고 계획 PR을
+병합해야 구현을 시작할 수 있습니다. 실제로 승인된 결과는
+[`changes/CHG-TASK-001/`](./changes/CHG-TASK-001/)에서 확인하세요.
 
 ### 목표와 흐름
 
@@ -136,7 +137,7 @@ PR 번호·SHA·Run ID를 직접 적을 필요는 없다. UI가 선언된 저장
    `.task-packets/candidate-workspaces/<run-id>/`에 별도 Root clone을 만들어 브랜치·서비스 포인터·기록을
    준비하고, Root·서비스 검사와 원격 PR·CI 검사, 제품 E2E와 승인 범위를 검사한다. 기존 Root 작업 파일과
    Writer workspace·Git index는 건드리지 않는다. 실패하면 그 줄에 원인과 **다시 시도**가 나온다.
-   이 실습에는 아직 제품 E2E가 없으므로 ②가 막힌다. **Agent에게 E2E 맡기기**를 누르고
+   제품 E2E가 아직 없으면 ②가 막힌다. **Agent에게 E2E 맡기기**를 누르고
    **지시서 복사**·**작업 폴더 경로 복사**로 Agent에게 전달한다. Agent는 승인 원본과 사본·패킷을
    대조하고 `e2e/**`만 작성·로컬 검증한다. 서비스 코드, 계약, Root 기록·포인터를 수정하거나
    원격 검증·push·PR을 수행하지 않는다. Agent 단계에는 UI의 workspace 변경·검증이 잠긴다.
@@ -168,8 +169,8 @@ Playwright browser API를 사용한다. 실제로 고정된 front/back을 설치
 `npm run test:e2e`를 선언한다. 선언하지 않은 Change는 제품 E2E를 요구하지 않는다.
 
 승인 원본은 `.task-packets/<run-id>.candidate-approval.json`, 진행·검증·마감 기록은
-`.task-packets/<run-id>.candidate-state.json`에 남는다. 같은 Root에서 다시 접속하면 진행 중인
-마감을 자동으로 복원한다. Run ID·workspace·digest는 화면의 **기술 상세**에서 볼 수 있다.
+`.task-packets/<run-id>.candidate-state.json`에 남는다. 진행 중인 마감이 있으면 같은 Root에
+다시 접속할 때 자동으로 복원한다. Run ID·workspace·digest는 화면의 **기술 상세**에서 볼 수 있다.
 승인·패킷·workspace는 덮어쓰지 않고 실패한 clone도 보존한다. Root base·계약·선택한 PR·SHA·범위가
 바뀌면 기존 증거를 재사용하지 않고 다시 확인·승인한다. 잠금이나 부분 저장 파일의 복구는
 [RUNBOOK.md 9장](./RUNBOOK.md#9-작업-마감)을 따른다.
@@ -212,8 +213,14 @@ Playwright browser API를 사용한다. 실제로 고정된 front/back을 설치
 
 ## 이 실습 Root의 설정 차이
 
-- 원본 템플릿의 self-hosted main job 대신 공개 저장소용 GitHub-hosted runner와 read-only 기본 토큰을 사용한다. private 저장소나 기업 runner 정책을 변경한 것이 아니다.
-- Actions를 full commit SHA로 고정했다.
-- 계획·Candidate UI suite는 `npm run test:ui`로 실행하고 제품 `test:e2e`에서 제외했다. 제품 suite가 없으면 명시적 실행은 실패하며 기존 CI의 optional 실행은 skipped라고 기록한다. Candidate UI는 제품 E2E를 필수로 실행하고 없음·실패 시 PR 생성을 막는다. UI 테스트나 skipped를 제품 통과 증거로 세지 않는다.
-- 초기 submodule 등록만 Candidate 없이 허용하는 opt-in CI 설정을 추가했다. 기존 포인터 이동은 여전히 Candidate 없으면 실패한다.
-- 이 파일은 공개 실습 시나리오이고 RUNBOOK은 현재 checkout의 운영 절차다. 기업 네트워크·private 저장소·self-hosted runner를 도입한다면 별도 정책과 설정을 확인한다. 실행·권한 계약은 AGENTS.md와 승인된 계획을 따른다.
+팀 Root를 만들 때 참고할 수 있는, 이 저장소가 템플릿 기본값에서 벗어난 점입니다.
+
+- 공개 저장소라 GitHub-hosted runner와 read-only 기본 토큰을 쓴다. 템플릿 기본값은
+  self-hosted main job이며, 기업 네트워크·private 저장소를 쓴다면 그쪽을 따른다.
+- 단일 계정으로 돌리기 위해 CODEOWNERS와 리뷰어 정책을 뺐다. 템플릿에는 그대로 있다.
+- 초기 submodule 등록만 Candidate 없이 허용하는 opt-in CI 설정을 추가했다. 이후의 포인터
+  이동은 여전히 Candidate 없이는 실패한다.
+- 도구 화면 회귀 suite(`npm run test:ui`)와 제품 E2E(`npm run test:e2e`)는 별개다.
+  UI 테스트나 suite 없음으로 인한 skip을 제품 통과 증거로 세지 않는다.
+
+실행·권한 계약은 [AGENTS.md](./AGENTS.md)와 승인된 계획을 따른다.

@@ -72,7 +72,7 @@ work_units:
       - npm run verify:registry -- --strict
   - id: closure-base-ancestry
     repo: root
-    state: in_progress
+    state: merged
     goal: Let a change close after other changes have landed on main.
     branch: feat/CHG-PILOT-CLOSE-001/closure-base-ancestry
     base_sha: 1b7dcf2c8227005c3830616da9789b933bb910db
@@ -84,6 +84,25 @@ work_units:
       - tests/candidate.test.mjs
     depends_on:
       - close-flow-followups
+    verify:
+      - npm test
+      - npm run test:ui
+      - npm run verify:registry -- --strict
+  - id: ci-gate-hygiene
+    repo: root
+    state: in_progress
+    goal: Skip the branch gate where no Change exists and run the screen suite on pull requests only.
+    branch: feat/CHG-PILOT-CLOSE-001/ci-gate-hygiene
+    base_sha: 4d3a9170942be0e0fe99c71affb6b3df94c9b019
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-CLOSE-001/WORK_UNITS.yaml
+      - changes/CHG-PILOT-CLOSE-001/PRS.yaml
+      - .github/workflows/ci.yml
+      - scripts/ci-workflow-check.mjs
+      - tests/ci-workflow.test.mjs
+    depends_on:
+      - closure-base-ancestry
     verify:
       - npm test
       - npm run test:ui

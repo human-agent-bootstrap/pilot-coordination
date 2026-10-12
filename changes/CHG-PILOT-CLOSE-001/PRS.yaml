@@ -22,8 +22,16 @@ prs:
   - key: closure-base-ancestry
     repo: root
     work_unit: closure-base-ancestry
+    number: 8
+    state: merged
+    base_sha: 1b7dcf2c8227005c3830616da9789b933bb910db
+    head_sha: 23057377768ecaee643a32766a43e56f72a0d44b
+    merge_sha: 4d3a9170942be0e0fe99c71affb6b3df94c9b019
+  - key: ci-gate-hygiene
+    repo: root
+    work_unit: ci-gate-hygiene
     number: null
     state: not-started
-    base_sha: 1b7dcf2c8227005c3830616da9789b933bb910db
+    base_sha: 4d3a9170942be0e0fe99c71affb6b3df94c9b019
     head_sha: null
     merge_sha: null

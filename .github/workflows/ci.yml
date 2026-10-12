@@ -36,6 +36,9 @@ jobs:
       - run: node scripts/ci-workflow-check.mjs --branch "${{ github.head_ref }}"
 
   planning-ui:
+    # Only when someone changes the tool. A consumer committing their own plan should not
+    # pay for a Chromium install on every push.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

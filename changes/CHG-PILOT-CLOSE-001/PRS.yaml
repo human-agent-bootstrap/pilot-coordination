@@ -38,8 +38,16 @@ prs:
   - key: worked-example-readme
     repo: root
     work_unit: worked-example-readme
+    number: 10
+    state: merged
+    base_sha: 015bd8756544c1cdd825e7bcbc869f6177dc7d85
+    head_sha: b792f29a750ad9bc35325f9fc204a03a1a2a7dfe
+    merge_sha: 9191b92f8a22588b7146b52ee2f8de948806f37f
+  - key: pilot-scenario-cleanup
+    repo: root
+    work_unit: pilot-scenario-cleanup
     number: null
     state: not-started
-    base_sha: 015bd8756544c1cdd825e7bcbc869f6177dc7d85
+    base_sha: 9191b92f8a22588b7146b52ee2f8de948806f37f
     head_sha: null
     merge_sha: null

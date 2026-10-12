@@ -109,7 +109,7 @@ work_units:
       - npm run verify:registry -- --strict
   - id: worked-example-readme
     repo: root
-    state: in_progress
+    state: merged
     goal: Open this repository as the completed worked example instead of a broken Quick Start.
     branch: docs/CHG-PILOT-CLOSE-001/worked-example-readme
     base_sha: 015bd8756544c1cdd825e7bcbc869f6177dc7d85
@@ -119,6 +119,21 @@ work_units:
       - changes/CHG-PILOT-CLOSE-001/PRS.yaml
       - README.md
       - TESTING.md
+    depends_on: []
+    verify:
+      - npm test
+      - npm run verify:registry -- --strict
+  - id: pilot-scenario-cleanup
+    repo: root
+    state: in_progress
+    goal: Read PILOT.md as a scenario a teammate can follow rather than a log of what already happened.
+    branch: docs/CHG-PILOT-CLOSE-001/pilot-scenario-cleanup
+    base_sha: 9191b92f8a22588b7146b52ee2f8de948806f37f
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-CLOSE-001/WORK_UNITS.yaml
+      - changes/CHG-PILOT-CLOSE-001/PRS.yaml
+      - PILOT.md
     depends_on: []
     verify:
       - npm test

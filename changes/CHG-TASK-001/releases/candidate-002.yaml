@@ -1,0 +1,348 @@
+schema_version: 1
+change_id: CHG-TASK-001
+candidate: 2
+state: ready
+plan_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
+approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+services:
+  - repo: pilot-front
+    path: services/pilot-front
+    base_sha: 272160d8fb97b7ab879dae204e3287576225ca6d
+    sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    source_prs:
+      - pilot-front
+  - repo: pilot-back
+    path: services/pilot-back
+    base_sha: 948127bb168d36e8e89b862e92d4313faee40135
+    sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
+    source_prs:
+      - pilot-back
+evidence:
+  - criterion: AC-001
+    kind: command
+    command: npm ci --include=dev
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+    check_id: check-1
+  - criterion: AC-002
+    kind: command
+    command: npm ci --include=dev
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+    check_id: check-1
+  - criterion: AC-003
+    kind: command
+    command: npm ci --include=dev
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+    check_id: check-1
+  - criterion: AC-004
+    kind: command
+    command: npm ci --include=dev
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+    check_id: check-1
+  - criterion: AC-005
+    kind: command
+    command: npm ci --include=dev
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-1
+  - criterion: AC-005
+    kind: command
+    command: npm test
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-2
+  - criterion: AC-005
+    kind: command
+    command: npm run lint
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-3
+  - criterion: AC-005
+    kind: command
+    command: npm run typecheck
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-4
+  - criterion: AC-005
+    kind: command
+    command: npm run build
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-5
+  - criterion: AC-005
+    kind: command
+    command: uv sync --locked --python 3.12
+    target_sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-6
+  - criterion: AC-005
+    kind: command
+    command: uv run --locked pytest
+    target_sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-7
+  - criterion: AC-005
+    kind: command
+    command: uv run --locked ruff check .
+    target_sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-8
+  - criterion: AC-006
+    kind: command
+    command: npm ci --include=dev
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-1
+  - criterion: AC-006
+    kind: command
+    command: npm test
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-2
+  - criterion: AC-006
+    kind: command
+    command: npm run lint
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-3
+  - criterion: AC-006
+    kind: command
+    command: npm run typecheck
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-4
+  - criterion: AC-006
+    kind: command
+    command: npm run build
+    target_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-5
+  - criterion: AC-006
+    kind: command
+    command: uv sync --locked --python 3.12
+    target_sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-6
+  - criterion: AC-006
+    kind: command
+    command: uv run --locked pytest
+    target_sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-7
+  - criterion: AC-006
+    kind: command
+    command: uv run --locked ruff check .
+    target_sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
+    root_head: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+    approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+    exit_code: 0
+    reviewer: jpyoon
+    note: |-
+      pilot-front · npm ci --include=dev → exit 0 (대상 ec57ce6)
+      pilot-front · npm test → exit 0 (대상 ec57ce6)
+      pilot-front · npm run lint → exit 0 (대상 ec57ce6)
+      pilot-front · npm run typecheck → exit 0 (대상 ec57ce6)
+      pilot-front · npm run build → exit 0 (대상 ec57ce6)
+      pilot-back · uv sync --locked --python 3.12 → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
+      pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
+    check_id: check-8

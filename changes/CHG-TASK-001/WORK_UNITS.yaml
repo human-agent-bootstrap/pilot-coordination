@@ -2,11 +2,11 @@ schema_version: 1
 change_id: CHG-TASK-001
 state: approved
 plan_base_sha: a514f041fd0ba799c7cbebcac856371ccd782c71
-plan_merge_sha: pending
+plan_merge_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
 work_units:
   - id: contract-and-plan
     repo: root
-    state: in_progress
+    state: merged
     goal: Approve the scope, contracts, work boundaries, and verification gates.
     branch: change/CHG-TASK-001/coordination
     base_sha: a514f041fd0ba799c7cbebcac856371ccd782c71
@@ -20,7 +20,7 @@ work_units:
   - id: pilot-front
     goal_id: GOAL-001
     repo: pilot-front
-    state: ready
+    state: merged
     goal: React·TypeScript·Vite 최소 프로젝트와 작업 입력·목록·오류 안내, 계약 기반 테스트와 서비스 CI를 구현한다.
     branch: feat/CHG-TASK-001/pilot-front
     base_sha: 272160d8fb97b7ab879dae204e3287576225ca6d
@@ -38,7 +38,7 @@ work_units:
   - id: pilot-back
     goal_id: GOAL-001
     repo: pilot-back
-    state: ready
+    state: merged
     goal: FastAPI 최소 프로젝트와 등록·조회 API, SQLite 저장, 입력 오류·CORS, 테스트와 서비스 CI를 구현한다.
     branch: feat/CHG-TASK-001/pilot-back
     base_sha: 948127bb168d36e8e89b862e92d4313faee40135
@@ -53,10 +53,10 @@ work_units:
       - uv run --locked ruff check .
   - id: candidate-integration
     repo: root
-    state: draft
+    state: in_progress
     goal: Pin reviewed service merge SHAs and verify the exact candidate.
     branch: change/CHG-TASK-001/candidate-integration
-    base_sha: pending-plan-merge
+    base_sha: 624fcfd3745338a81404c9ec399e5c91e8a19c08
     writer: jpyoon
     write_paths:
       - changes/CHG-TASK-001/WORK_UNITS.yaml
@@ -72,4 +72,5 @@ work_units:
     verify:
       - npm test
       - npm run verify:prs -- --change CHG-TASK-001
-      - npm run verify:candidate -- --change CHG-TASK-001 --target-ref origin/main
+      - npm run verify:candidate -- --change CHG-TASK-001 --target-ref
+        origin/main

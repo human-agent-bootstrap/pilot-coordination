@@ -26,3 +26,10 @@ GOAL-001 작업을 등록하고 다시 확인한다: 사용자는 작업 제목�
 ## Next gate
 
 A human reviews and approves the Root planning PR. Its merge SHA becomes the immutable plan version supplied to participating Writers.
+
+
+## Candidate execution
+
+- Run: run-CHG-TASK-001-candidate-002
+- Approval: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
+- Service PRs: merged and pinned; Candidate PR, main CI and integration environment remain separate human gates.

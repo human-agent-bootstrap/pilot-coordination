@@ -1,39 +1,39 @@
 schema_version: 1
 change_id: CHG-TASK-001
 state: approved
-plan_merge_sha: pending
+plan_merge_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
 prs:
   - key: root-planning
     repo: root
     work_unit: contract-and-plan
     number: 3
-    state: open
+    state: merged
     base_sha: a514f041fd0ba799c7cbebcac856371ccd782c71
-    head_sha: 7188adf46574bdd4cf35173998dd164f1d3f9b14
-    merge_sha: null
+    head_sha: 6a52cf2e16a3c9f6c827793a4410fbce4608a0a8
+    merge_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
   - key: pilot-front
     repo: pilot-front
     work_unit: pilot-front
-    number: null
-    state: not-started
+    number: 3
+    state: merged
     base_sha: 272160d8fb97b7ab879dae204e3287576225ca6d
-    head_sha: null
-    merge_sha: null
+    head_sha: 757d7c958a1f090b762ca4435252f64aaa75d770
+    merge_sha: ec57ce6b66cca0e6588abc46294f3cf9095e3a83
     merge_method: squash
   - key: pilot-back
     repo: pilot-back
     work_unit: pilot-back
-    number: null
-    state: not-started
+    number: 3
+    state: merged
     base_sha: 948127bb168d36e8e89b862e92d4313faee40135
-    head_sha: null
-    merge_sha: null
+    head_sha: 2aca0da3cc96baf68a9640b7aa44e97d0785396f
+    merge_sha: 08ed728587c4450d58ab93ae00f14bd66da441a4
     merge_method: squash
   - key: root-candidate
     repo: root
     work_unit: candidate-integration
     number: null
     state: not-started
-    base_sha: pending-plan-merge
+    base_sha: 624fcfd3745338a81404c9ec399e5c91e8a19c08
     head_sha: null
     merge_sha: null

@@ -789,3 +789,32 @@ test('a published run is not stale when main moves: that is what merging it does
   assert.equal(f.serviceApi.status('candidate-run').stale, false);
   assert.equal(f.serviceApi.status('candidate-run').phase, 'pr-created');
 });
+
+test('closing still works after other changes land on main', async (t) => {
+  const f = fixture(t);
+  const created = await published(f, t);
+  const mergeSha = mergeCandidate(f, created);
+  await f.serviceApi.perform('remote-status', { run: 'candidate-run' });
+
+  // Somebody else merges while the Coordinator checks the integration environment:
+  // a real commit descending from the Candidate merge, with no branch or worktree touched.
+  const workspace = f.serviceApi.status('candidate-run').workspace;
+  const tree = f.git(['rev-parse', `${mergeSha}^{tree}`], workspace);
+  const moved = f.git(['commit-tree', tree, '-p', mergeSha, '-m', 'unrelated change'], workspace);
+  f.git(['update-ref', 'refs/remotes/origin/main', moved], workspace);
+
+  const note = '실습 환경에서 등록과 새로고침을 직접 확인했다.';
+  await f.serviceApi.perform('close', { run: 'candidate-run', environment: { note, confirmed: true } });
+  let state = f.serviceApi.status('candidate-run');
+  for (let attempts = 0; attempts < 300 && state.job?.running; attempts += 1) {
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 10));
+    state = f.serviceApi.status('candidate-run');
+  }
+  assert.equal(state.phase, 'closure-pr-created', JSON.stringify(state.error));
+  const release = YAML.parse(readFileSync(join(state.workspace, `changes/${change}/releases/candidate-001.yaml`), 'utf8'));
+  // The record still cites the Candidate's own merge, not whatever main drifted to.
+  assert.equal(release.closure.candidate_merge_sha, mergeSha);
+  // The branch is based on current main so the closure PR merges cleanly.
+  const manifest = YAML.parse(readFileSync(join(state.workspace, `changes/${change}/WORK_UNITS.yaml`), 'utf8'));
+  assert.equal(manifest.work_units.find((unit) => unit.id === 'candidate-closure').base_sha, moved);
+});

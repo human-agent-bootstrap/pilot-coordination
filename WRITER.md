@@ -3,11 +3,14 @@
 작업 지시서(Task Packet)를 받은 담당자(Writer)가 읽는 문서입니다. 지시서를 받은 순간부터 서비스 PR이
 병합될 때까지를 다룹니다.
 
+Candidate E2E용 `.candidate.md`를 받았다면 아래 일반 Writer CLI를 사용하지 않고
+[Candidate E2E 위임](#candidate-e2e-위임을-받았을-때)의 별도 경로를 따릅니다.
+
 | 문서 | 역할 |
 |---|---|
 | [`AGENTS.md`](./AGENTS.md) | Agent와 Writer가 지키는 실행 계약. 규칙의 기준 |
 | [`RUNBOOK.md`](./RUNBOOK.md) | 전체 운영 절차와 명령 레퍼런스 |
-| [`README.md`](./README.md) | Root 구성과 계획 작성까지의 시작 안내 |
+| [`README.md`](./README.md) | Root 구성·계획·Candidate UI의 시작 안내 |
 | 이 문서 | 작업 지시서 하나를 끝내는 실행 안내 |
 
 작업 방식은 두 가지입니다. **직접 작업(방식 A)** 과 **Agent에 위임(방식 B)**. 1–2장은 공통이고,
@@ -30,7 +33,9 @@ npm run writer -- pr      --packet <run-id> --apply   # 6장: push와 PR 생성
 
 `--apply` 없이 실행하면 무엇을 할지만 보여 줍니다. `finish`는 check → commit → handoff → pr을
 한 번에 실행합니다. 이 명령들이 하는 일을 이해하려면 아래 각 장을 읽으세요. **구현, 리뷰, merge,
-그리고 7장의 Root 기록 파일은 자동화하지 않습니다.**
+그리고 7장의 Root 기록 파일은 이 Writer CLI가 자동화하지 않습니다.**
+서비스 PR 병합 이후 Root 기록은 Coordinator가 **작업 마감** UI로 준비합니다.
+`pr`와 `finish`의 push·PR 단계는 사람이 실행하며 Agent에게 맡기지 않습니다.
 
 ---
 
@@ -227,6 +232,7 @@ Coordinator에게 넘길 최종 증거: PR 번호, base SHA, PR head SHA, merge 
 | `changes/<ID>/WORK_UNITS.yaml` | Coordinator (`candidate-integration` unit) | 읽기만 합니다. 자기 Work Unit이 `ready`인지 확인. 병합 후 `state: merged` 기록은 Coordinator |
 | `changes/<ID>/PRS.yaml` | Coordinator | 고치지 않습니다. PR 번호와 SHA를 handoff로 전달 |
 | `changes/<ID>/STATUS.md` | Coordinator | 고치지 않습니다. CI·사람 확인 기록·미실행 검증을 handoff로 전달 |
+| `changes/<ID>/releases/candidate-*.yaml`·서비스 포인터 | Coordinator | 고치지 않습니다. Candidate UI가 실제 병합 결과로 준비 |
 | 서비스 저장소의 `write_paths` | **Writer** | 유일하게 쓰는 범위 |
 
 근거는 계획 자체에 있습니다. 구현 Work Unit의 `write_paths`에는 서비스 경로만 들어 있고, Root
@@ -237,26 +243,36 @@ Coordinator에게 넘길 최종 증거: PR 번호, base SHA, PR head SHA, merge 
 ### Writer와 Coordinator가 같은 사람일 때
 
 작은 팀에서는 흔합니다. 역할은 겸해도 **PR은 겹치지 않게 분리**합니다. 서비스 PR을 먼저
-병합하고, Root 기록은 모든 서비스 PR이 병합된 뒤 Candidate PR 하나에서 한 번에 합니다
-(`RUNBOOK.md` §9). 그때 채우는 값:
+병합하고, 모든 서비스 PR이 병합된 뒤 Coordinator 역할로 상단 **작업 마감**을 엽니다
+([RUNBOOK.md §9](./RUNBOOK.md#9-작업-마감)).
+**병합 결과 불러오기 → 실행 승인 → Candidate 준비**로 실제 PR·SHA와 Root 기록·포인터를
+한 번에 준비합니다. 수동으로 YAML에 SHA를 복사하지 않으며 별도 Root clone을 쓰므로 기존
+서비스 Writer workspace와 Git index도 그대로 유지합니다.
 
-```yaml
-# WORK_UNITS.yaml / PRS.yaml
-plan_merge_sha: <planning merge SHA>
+필요하면 E2E 위임·handoff 확인 후 **검증 실행 → 증거 연결 저장 → Candidate PR 만들기**로
+진행합니다. 구현한 사람 본인이 PR의 diff·CI·증거를 확인하고 병합할 수 있지만,
+PR 생성·병합·main CI·통합 환경 확인은 각각 별개입니다. 통합 환경과 최종 완료는 사람이
+확인합니다. CLI로 직접 준비하는 대안은 RUNBOOK §9를 따릅니다.
 
-# WORK_UNITS.yaml
-#   병합된 구현 Work Unit → state: merged
-#   candidate-integration → base_sha를 실제 값으로
+### Candidate E2E 위임을 받았을 때
 
-# PRS.yaml (각 PR 행)
-number / head_sha / merge_sha / state: merged
+이 패킷은 기존 서비스 작업 지시서 `.task-packets/<run-id>.md`와 다릅니다. UI의
+**Agent에게 E2E 작성 위임**이 만든 `.task-packets/<run-id>.candidate.md`를 사용합니다.
 
-# releases/candidate-001.yaml
-sha: <서비스 merge SHA>
-```
+1. 패킷에 지정된 전용 Root workspace에서 `AGENTS.md`, 승인 계획·계약, 패킷과
+   `.candidate-approval.json` 사본을 읽습니다. 패킷에 적힌 Coordinator 제어 영역의 원본과
+   사본·패킷을 대조합니다. digest는 변조 검사이지 사람의 승인 신원 증명이 아닙니다.
+2. 고정된 서비스 SHA·계약을 대상으로 `e2e/**`만 작성합니다. 테스트가 서비스 설치·실행,
+   임시 데이터·종료를 책임집니다. 서비스 구현·계약·Root 기록·포인터·CI를 수정하지 않습니다.
+   Coordinator가 미리 준비한 Root 변경을 자신의 수정으로 staging·commit하지 않습니다.
+3. 패킷의 **agent local** 검사(`npm run test:e2e`와 `--candidate-role agent` 범위 검사)만
+   수행하고 실제 exit code와 Head SHA를 handoff에 적습니다. 원격 PR 검사·push·PR·merge,
+   `writer pr`·`writer finish`는 수행하지 않습니다. 토큰이나 UI 세션 주소를 받지 않습니다.
+4. handoff를 Coordinator에게 전달하고 작업을 끝냅니다. 사람이 UI에서 **Agent handoff 확인**을
+   눌러야 UI 잠금이 해제됩니다. 이후 전체 재검증·완료 기준 증거 연결·PR 생성은 Coordinator가 합니다.
 
-그다음 `npm run verify:prs`와 `npm run verify:candidate`로 기록과 실제 GitHub 상태를 대조하고,
-Candidate PR은 구현한 사람 본인이 검증 결과를 확인하고 병합할 수 있습니다. 기록을 먼저 쓰고 나중에 맞추는 것이 아니라, 병합된 사실을 그대로 옮겨 적습니다.
+Agent 단계에는 UI가 같은 workspace를 수정·검증하지 않습니다. 인계 후 수정이 더 필요하면
+Coordinator에게 알려 작업 주체를 다시 조율합니다. Agent와 UI가 동시에 수정하지 않습니다.
 
 ## 8. 멈춰야 하는 상황
 
@@ -269,5 +285,7 @@ Candidate PR은 구현한 사람 본인이 검증 결과를 확인하고 병합�
 - secret, 운영 권한, 파괴적 작업이 필요하다
 - 필수 검증을 실행할 수 없다
 
-이 경우 영향받는 Work Unit의 승인은 무효입니다. Coordinator가 계획을 고쳐 다시 승인받고, 새
+일반 서비스 작업에서는 영향받는 Work Unit의 승인이 무효입니다. Coordinator가 계획을 고쳐 다시 승인받고, 새
 plan SHA로 작업 지시서를 재발급합니다 (`AGENTS.md` §8, `RUNBOOK.md` §10).
+Candidate 패킷에서는 변경의 종류에 따라 새 계획 승인 또는 새 UI 실행 승인·패킷이 필요하며,
+기존 원본·사본을 수정해서 승인을 유지하지 않습니다 (`RUNBOOK.md` §9).

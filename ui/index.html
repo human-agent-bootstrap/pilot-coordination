@@ -13,7 +13,10 @@
       <span class="brand-mark" aria-hidden="true">C</span>
       <span class="brand-copy"><strong>Coordination</strong><small>Planning workspace</small></span>
     </a>
-    <button class="secondary compact" id="dispatch-open" type="button">작업 지시서 만들기</button>
+    <nav class="topbar-actions" aria-label="작업 화면">
+      <button class="secondary compact" id="candidate-open" type="button">작업 마감</button>
+      <button class="secondary compact" id="dispatch-open" type="button">작업 지시서 만들기</button>
+    </nav>
   </header>
 
   <main class="shell">
@@ -210,6 +213,38 @@
           </section>
         </section>
       </form>
+    </section>
+  </main>
+
+  <main id="candidate-screen" class="candidate-screen" hidden aria-labelledby="candidate-title">
+    <div class="section-heading row-heading">
+      <div><h1 id="candidate-title" tabindex="-1">작업 마감</h1><p>담당자들이 끝낸 결과를 모아 검증하고, 이 작업을 닫습니다.</p></div>
+      <button class="secondary" id="candidate-close" type="button">계획 화면으로</button>
+    </div>
+    <p id="candidate-message" class="message" hidden role="status"></p>
+    <div class="context-card">
+      <div class="field-grid">
+        <label>마감할 작업<select id="candidate-change" aria-label="마감할 작업"></select></label>
+        <label id="candidate-run-field" hidden>진행 중인 마감<select id="candidate-run" aria-label="진행 중인 마감"></select></label>
+      </div>
+    </div>
+    <section id="candidate-summary" hidden aria-labelledby="candidate-summary-title">
+      <h2 id="candidate-summary-title">모인 결과</h2>
+      <div id="candidate-prs"></div>
+      <div id="candidate-blockers" class="validation-summary" role="status"></div>
+      <details><summary>바꿀 기록과 고정할 SHA</summary><pre id="candidate-preview-detail"></pre></details>
+      <div class="publish-actions"><button class="primary" id="candidate-start" type="button" disabled>이 결과로 마감 시작</button></div>
+    </section>
+    <section id="candidate-execution" hidden aria-labelledby="candidate-execution-title">
+      <h2 id="candidate-execution-title">마감 진행</h2>
+      <ol id="candidate-track" class="candidate-track"></ol>
+      <section id="candidate-evidence" hidden aria-labelledby="candidate-evidence-title">
+        <h3 id="candidate-evidence-title">완료 기준 확인</h3>
+        <p class="help">검사 성공만으로 완료가 되지는 않습니다. 제안된 근거가 각 기준을 실제로 입증하는지 확인하세요.</p>
+        <div id="candidate-evidence-fields"></div>
+        <button class="primary" id="candidate-save-evidence" type="button">완료 기준 확인 완료</button>
+      </section>
+      <details><summary>기술 상세</summary><pre id="candidate-logs"></pre></details>
     </section>
   </main>
 

@@ -69,6 +69,179 @@ test.afterEach(() => {
   rmSync(join(root, 'changes/CHG-RESUME-001'), { recursive: true, force: true });
 });
 
+test('Close screen needs no identifiers, runs one track, and separates every gate through closure', async ({ page }) => {
+  const approval = { change: 'CHG-EXISTING-001', candidate: '001', planSha: 'a'.repeat(40), baseSha: 'b'.repeat(40),
+    rows: [{ unit: 'api', repo: 'api', number: 2 }],
+    services: [{ repo: 'api', sha: 'c'.repeat(40) }], criteria: [{ id: 'AC-001', text: '실제 제품 결과를 확인한다.' }] };
+  const derivedRun = 'run-CHG-EXISTING-001-candidate-001';
+  // This change's plan declares npm run test:e2e, so a missing suite must block.
+  let run = { run: derivedRun, change: approval.change, candidate: '001', phase: 'prepared',
+    needsProductE2e: true, hasProductE2e: false,
+    approval, approvalDigest: 'd'.repeat(64), workspace: '/isolated/candidate-browser', checks: [], steps: [], evidence: [],
+    gates: { prCreated: false, merged: false, mainCiPassed: false, integrationEnvironment: 'human-confirmation-required', closed: false } };
+  let exists = false;
+  const requests = [];
+  const verified = () => {
+    run.phase = 'verified';
+    run.hasProductE2e = true;
+    run.checks = [{ id: 'check-1', command: 'npm run test:e2e', repo: 'root', exitCode: 0, targetSha: 'e'.repeat(40), output: 'Actual product result' }];
+    run.suggestions = [{ criterion: 'AC-001', checkIds: ['check-1'], suggested: true, note: 'root · npm run test:e2e → exit 0' }];
+  };
+  await page.route('**/api/candidate/**', async (route) => {
+    const request = route.request();
+    requests.push({ url: request.url(), token: request.headers()['x-coordination-token'], body: request.postDataJSON() });
+    const path = new URL(request.url()).pathname;
+    let body;
+    if (path.endsWith('/status')) {
+      body = new URL(request.url()).searchParams.has('run') ? run
+        : { changes: ['CHG-EXISTING-001'], runs: exists ? [{ run: run.run, change: run.change, phase: run.phase }] : [] };
+    } else if (path.endsWith('/preview')) {
+      body = { ready: true, revision: 'preview-digest', change: approval.change, candidate: '001', planSha: approval.planSha,
+        baseSha: approval.baseSha, branch: 'change/CHG-EXISTING-001/candidate-integration', writer: 'alice',
+        rows: [{ unit: 'api', repo: 'api', number: 2, state: 'merged', mergeSha: 'c'.repeat(40), url: 'https://github.com/acme/api/pull/2', options: [{ number: 2 }], ci: { state: 'passed' } }],
+        files: ['changes/CHG-EXISTING-001/PRS.yaml'], services: approval.services, writePaths: ['e2e/**'], blockers: [] };
+    } else if (path.endsWith('/start')) {
+      exists = true;
+      run.phase = 'prepared';
+      body = { run: derivedRun, job: { action: 'start', running: false } };
+    } else if (path.endsWith('/packet')) {
+      run.phase = 'agent';
+      run.packetDigest = 'packet';
+      run.packet = { content: '# TASK\nOnly e2e/**.' };
+      body = run;
+    } else if (path.endsWith('/handoff')) {
+      run.phase = 'prepared';
+      verified();
+      body = run;
+    } else if (path.endsWith('/verify')) {
+      verified();
+      body = run;
+    } else if (path.endsWith('/fail-verify')) {
+      // A run whose checks came back non-zero without the job itself throwing.
+      run.phase = 'verification-failed';
+      run.error = null;
+      run.checks = [
+        { id: 'check-1', command: 'npm test', repo: 'root', exitCode: 0, output: 'ok' },
+        { id: 'check-2', command: 'npm run verify:prs -- --change CHG-EXISTING-001', repo: 'root', exitCode: 1, output: 'ERROR: token required' },
+      ];
+      body = run;
+    } else if (path.endsWith('/evidence')) {
+      run.evidence = [{ criterion: 'AC-001', command: 'npm run test:e2e', exit_code: 0 }];
+      run.linkedChecks = request.postDataJSON().links;
+      body = run;
+    } else if (path.endsWith('/pr')) {
+      run.phase = 'pr-created';
+      run.pr = { number: 10, url: 'https://github.com/acme/root/pull/10' };
+      run.gates.prCreated = true;
+      body = run;
+    } else if (path.endsWith('/remote-status')) {
+      run.gates.merged = true;
+      run.gates.mainCiPassed = true;
+      run.remote = { merged: true, mergeSha: 'f'.repeat(40), mainCiPassed: true };
+      body = run;
+    } else if (path.endsWith('/close')) {
+      run.phase = 'closure-pr-created';
+      run.gates.integrationEnvironment = 'confirmed';
+      run.gates.closurePrCreated = true;
+      run.closure = { environment: { note: '실습 환경에서 등록과 새로고침을 확인했다.' }, pr: { number: 11, url: 'https://github.com/acme/root/pull/11' } };
+      body = run;
+    } else if (path.endsWith('/merge-closure')) {
+      run.phase = 'closed';
+      run.gates.closureMerged = true;
+      run.gates.closed = true;
+      run.closure.merged = true;
+      body = run;
+    }
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  await page.goto(`${origin}/#token=candidate-session`);
+  await page.locator('#candidate-open').click();
+  await expect(page.locator('#candidate-screen')).toBeVisible();
+  await expect(page.locator('.shell')).toBeHidden();
+
+  // Opening the screen already answers "did the writers finish?" with no press and no identifiers.
+  await expect(page.locator('#candidate-summary')).toBeVisible();
+  await expect(page.locator('#candidate-prs')).toContainText('PR #2 병합됨');
+  await expect(page.locator('#candidate-run-field')).toBeHidden();
+  assert.equal(await page.locator('#candidate-screen input[type="text"], #candidate-screen input:not([type])').count(), 0);
+
+  await page.locator('#candidate-start').click();
+  const track = page.locator('#candidate-track .candidate-row');
+  await expect(track).toHaveCount(4);
+  await expect(track.nth(0)).toContainText('결과 모으기');
+  await expect(track.nth(1)).toContainText('제품 E2E 테스트가 없어');
+  await expect(track.nth(1)).toHaveClass(/blocked/);
+
+  await page.getByRole('button', { name: 'Agent에게 E2E 맡기기' }).click();
+  await expect(track.nth(1)).toContainText('Agent가 작업 폴더를 쓰고 있습니다');
+  await page.getByRole('button', { name: 'Agent 작업 끝났음' }).click();
+
+  // A failed check must name itself and still offer a way forward.
+  await page.evaluate(() => fetch('/api/candidate/fail-verify', { method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-coordination-token': 'candidate-session' },
+    body: JSON.stringify({ run: 'run-CHG-EXISTING-001-candidate-001' }) }));
+  await page.locator('#candidate-run').dispatchEvent('change');
+  await expect(track.nth(1)).toHaveClass(/blocked/);
+  await expect(track.nth(1)).toContainText('verify:prs');
+  await expect(track.nth(1).getByRole('button', { name: '다시 시도' })).toBeVisible();
+  await page.evaluate(() => fetch('/api/candidate/verify', { method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-coordination-token': 'candidate-session' },
+    body: JSON.stringify({ run: 'run-CHG-EXISTING-001-candidate-001' }) }));
+  await page.locator('#candidate-run').dispatchEvent('change');
+
+  // Evidence arrives pre-suggested; the per-criterion human confirmation is still required.
+  await expect(page.locator('#candidate-evidence')).toBeVisible();
+  await expect(page.locator('.evidence-suggestion')).toContainText('npm run test:e2e');
+  await expect(page.getByRole('button', { name: 'Candidate PR 만들기' })).toHaveCount(0);
+  await page.getByLabel('실제 결과를 확인했고 이 기준을 입증함을 확인합니다.').check();
+  await page.locator('#candidate-save-evidence').click();
+  await page.getByRole('button', { name: 'Candidate PR 만들기' }).click();
+
+  // PR creation, merge, main CI and the environment stay four distinct statements.
+  await expect(track.nth(3)).toContainText('PR #10 생성됨');
+  await expect(track.nth(3)).toContainText('병합 대기');
+  await expect(track.nth(3)).toContainText('main CI 대기');
+  await expect(track.nth(3)).toContainText('통합 환경 사람 확인 필요');
+
+  await page.evaluate(() => fetch('/api/candidate/remote-status', { method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-coordination-token': 'candidate-session' },
+    body: JSON.stringify({ run: 'run-CHG-EXISTING-001-candidate-001' }) }));
+  await page.locator('#candidate-run').dispatchEvent('change');
+  await expect(track.nth(3)).toContainText('main CI 통과');
+
+  const closeButton = page.getByRole('button', { name: '작업 마감', exact: true }).last();
+  await expect(closeButton).toBeDisabled();
+  await page.locator('#candidate-environment-note').fill('실습 환경에서 등록과 새로고침을 확인했다.');
+  await page.getByLabel('통합 환경을 직접 확인했습니다.').check();
+  await expect(closeButton).toBeEnabled();
+  await closeButton.click();
+  await expect(track.nth(3)).toContainText('통합 환경 확인됨');
+  await expect(page.getByRole('link', { name: '마감 PR #11 열기' })).toBeVisible();
+  // Creating the closure PR is not closing the change; a human still merges it.
+  await expect(track.nth(3)).toContainText('마감 PR #11을 사람이 확인하고 병합해야');
+  await expect(track.nth(3)).not.toHaveClass(/done/);
+
+  await page.evaluate(() => fetch('/api/candidate/merge-closure', { method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-coordination-token': 'candidate-session' },
+    body: JSON.stringify({ run: 'run-CHG-EXISTING-001-candidate-001' }) }));
+  await page.locator('#candidate-run').dispatchEvent('change');
+  await expect(track.nth(3)).toContainText('이 작업은 닫혔습니다');
+  await expect(track.nth(3)).toHaveClass(/done/);
+
+  await page.reload();
+  await page.locator('#candidate-open').click();
+  await expect(page.locator('#candidate-track .candidate-row').nth(3)).toContainText('이 작업은 닫혔습니다');
+  assert.ok(requests.every((request) => request.token === 'candidate-session'));
+  assert.ok(!requests.some((request) => request.body?.command || request.body?.workspace));
+  await page.screenshot({ path: join(import.meta.dirname, '../test-results/candidate-screen-desktop.png'), fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('#candidate-close')).toBeVisible();
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
+  await page.screenshot({ path: join(import.meta.dirname, '../test-results/candidate-screen-mobile.png'), fullPage: true });
+  await page.locator('#candidate-close').click();
+  await expect(page.locator('.shell')).toBeVisible();
+});
+
 test('meeting flow captures multiple goals and optional scope details before saving', async ({ page }) => {
   await page.goto(origin);
   await expect(page.getByRole('heading', { name: '협업 계획 세우기' })).toBeVisible();

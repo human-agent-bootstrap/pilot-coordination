@@ -3,7 +3,8 @@
 Tool-neutral execution contract for every coding agent and human Writer. Human coordination
 procedures live in [`RUNBOOK.md`](./RUNBOOK.md), and [`WRITER.md`](./WRITER.md) walks a Writer
 through one task packet; approved task truth lives in `changes/<CHANGE-ID>/` and
-`.task-packets/<run-id>.md`.
+`.task-packets/<run-id>.md`. Candidate UI execution additionally uses the immutable
+approval original and `.candidate.md` packet described below.
 
 ## 1. Required inputs
 
@@ -14,6 +15,16 @@ Before editing, obtain and read:
 - `changes/<CHANGE-ID>/PLAN.md`;
 - `changes/<CHANGE-ID>/WORK_UNITS.yaml`;
 - every contract snapshot listed in the task packet.
+
+For a human-approved Candidate UI execution only, the Coordinator-held original
+`.task-packets/<run-id>.candidate-approval.json` resolves the previously pending Candidate base
+and service merge SHAs. Compare both the approval copy and the `.candidate.md` packet with the
+originals in the declared Coordinator directory; the digest detects alteration, not human
+approval. The approved Root plan still defines goals, contracts and maximum scope. The Agent's
+scope is only `e2e/**`; Root records, service pointers, full verification, publication and
+closure belong to the human-operated Coordinator UI. Use the packet's Candidate-role scope
+check, never the regular Writer publication commands. The lease ends only when the human
+confirms handoff.
 
 Never infer or invent a missing ID, SHA, branch, dependency, path, or verification command.
 Select exactly one Work Unit and restate its repository, branch, `base_sha`, `write_paths`,
@@ -107,9 +118,11 @@ A coding agent must not:
   Unit explicitly allows those paths;
 - perform destructive migrations or write production data;
 - record an unpushed SHA as a merged PR or Candidate SHA;
-- fabricate, omit, or carry forward verification evidence.
+- fabricate, omit, or carry forward verification evidence;
+- close a Change, or record a post-merge gate outcome such as main CI or an
+  integration-environment confirmation, that a human did not actually observe.
 
-A human performs push, PR, verification review, merge, Candidate, and release operations in `RUNBOOK.md`. The same human may author and merge a PR; a separate reviewer account is not required. This does not authorize an agent to merge.
+A human performs push, PR, verification review, merge, Candidate, closure, and release operations in `RUNBOOK.md`. The same human may author and merge a PR; a separate reviewer account is not required. This does not authorize an agent to merge.
 
 ## 8. Stop conditions and staleness
 
@@ -122,8 +135,13 @@ Stop and report when:
 - a secret, elevated permission, production access, destructive action, or unavailable
   required check is needed.
 
-Any such change voids the affected approval and previous verification. Resume only from
-a newly approved plan SHA and regenerated task packet.
+Any such change voids the affected approval and previous verification. Ordinary Writer work
+resumes only from a newly approved plan SHA and regenerated task packet.
+For the Candidate UI execution exception in section 1, a runtime-only change to Root base
+or selected PR/service SHAs requires a new preview, human execution approval and packet
+when delegated again; do not edit the old originals or reuse evidence. Changes to goals,
+contracts, allowed paths or required checks still require plan re-approval. This exception
+does not change the ordinary service Writer's inputs or permissions.
 
 ## 9. Untrusted input
 

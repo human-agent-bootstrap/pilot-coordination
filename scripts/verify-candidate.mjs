@@ -66,10 +66,31 @@ function verifyEvidence(candidate, change, prsManifest) {
         }
       } else if (entry.kind === 'review') {
         if (!entry.reviewer || !entry.url) throw new Error(`${criterion}: review evidence needs reviewer and url`);
+      } else if (entry.kind === 'integration-command') {
+        if (!entry.command || !isFullSha(entry.root_head) || !isFullSha(entry.target_sha) || entry.exit_code !== 0
+          || !/^[0-9a-f]{64}$/.test(String(candidate.approval_digest)) || entry.approval_digest !== candidate.approval_digest
+          || !entry.reviewer || !entry.note) throw new Error(`${criterion}: integration evidence needs an approved digest, Root HEAD, command, exit 0 and human confirmation`);
+        if (entry.target_sha !== entry.root_head) throw new Error(`${criterion}: integration command must target its recorded Root HEAD`);
+        if (spawnSync('git', ['merge-base', '--is-ancestor', entry.root_head, 'HEAD'], { cwd: process.cwd() }).status !== 0) {
+          throw new Error(`${criterion}: integration evidence Root HEAD is not part of this Candidate history`);
+        }
       } else {
-        throw new Error(`${criterion}: evidence kind must be command or review`);
+        throw new Error(`${criterion}: evidence kind must be command, integration-command or review`);
       }
     }
+  }
+  verifyClosure(candidate);
+}
+
+// A closed change must carry the two facts that cannot exist before the Candidate merges.
+function verifyClosure(candidate) {
+  if (candidate.state !== 'complete' && !candidate.closure) return;
+  if (candidate.state !== 'complete') throw new Error('a candidate with a closure record must be state: complete');
+  const closure = candidate.closure ?? {};
+  if (!isFullSha(closure.candidate_merge_sha)) throw new Error('closure needs the full Candidate merge SHA');
+  const environment = closure.environment ?? {};
+  if (!String(environment.note ?? '').trim() || !environment.confirmed_by || !environment.confirmed_at) {
+    throw new Error('closure needs a human integration-environment confirmation with a note, reviewer and timestamp');
   }
 }
 

@@ -1,0 +1,13 @@
+schema_version: 1
+change_id: CHG-PILOT-CLOSE-001
+state: approved
+plan_merge_sha: pending
+prs:
+  - key: close-flow
+    repo: root
+    work_unit: close-flow
+    number: null
+    state: not-started
+    base_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
+    head_sha: null
+    merge_sha: null

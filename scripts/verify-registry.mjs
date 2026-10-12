@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { fail, isFullSha, isPlanningUnit, parseArgs, readChangeManifest, readRegistry, REPO_SENTINELS } from './lib.mjs';
 
 const TERMINAL_UNIT_STATES = new Set(['merged', 'complete', 'completed', 'aborted', 'abandoned']);
-const UNIT_STATES = new Set(['draft', 'ready', 'in_progress', 'merged', 'blocked', 'aborted']);
-const CHANGE_STATES = new Set(['draft', 'approved', 'active', 'candidate', 'aborted']);
+const UNIT_STATES = new Set(['draft', 'ready', 'in_progress', 'merged', 'complete', 'blocked', 'aborted']);
+const CHANGE_STATES = new Set(['draft', 'approved', 'active', 'candidate', 'complete', 'aborted']);
 
 function gitmodules() {
   const path = join(process.cwd(), '.gitmodules');
@@ -208,11 +208,16 @@ try {
       if (String(a.unit.repo) !== String(b.unit.repo)) continue;
       if (a.change !== b.change && REPO_SENTINELS.has(String(a.unit.repo))) continue;
       if (a.change === b.change && a.ordered(a.unit, b.unit)) continue;
-      const shared = a.unit.write_paths.filter((path) => b.unit.write_paths.some((other) => overlaps(path, other)));
-      if (shared.length) {
+      // Attribute each path to the unit that declared it: `**` on one side collides with
+      // everything on the other, and naming only one side reads as if both claimed it.
+      const collisions = a.unit.write_paths.flatMap((path) => b.unit.write_paths
+        .filter((other) => overlaps(path, other)).map((other) => [path, other]));
+      if (collisions.length) {
         const left = a.change === b.change ? a.unit.id : `${a.change}/${a.unit.id}`;
         const right = a.change === b.change ? b.unit.id : `${b.change}/${b.unit.id}`;
-        warnings.push(`concurrent units ${left} and ${right} both write ${shared.join(', ')} in repo ${a.unit.repo}`);
+        const leftPaths = [...new Set(collisions.map(([path]) => path))].join(', ');
+        const rightPaths = [...new Set(collisions.map(([, other]) => other))].join(', ');
+        warnings.push(`concurrent units ${left} (${leftPaths}) and ${right} (${rightPaths}) overlap in repo ${a.unit.repo}`);
       }
     }
   }

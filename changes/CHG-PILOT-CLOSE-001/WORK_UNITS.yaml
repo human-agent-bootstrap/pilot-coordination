@@ -90,7 +90,7 @@ work_units:
       - npm run verify:registry -- --strict
   - id: ci-gate-hygiene
     repo: root
-    state: in_progress
+    state: merged
     goal: Skip the branch gate where no Change exists and run the screen suite on pull requests only.
     branch: feat/CHG-PILOT-CLOSE-001/ci-gate-hygiene
     base_sha: 4d3a9170942be0e0fe99c71affb6b3df94c9b019
@@ -106,4 +106,20 @@ work_units:
     verify:
       - npm test
       - npm run test:ui
+      - npm run verify:registry -- --strict
+  - id: worked-example-readme
+    repo: root
+    state: in_progress
+    goal: Open this repository as the completed worked example instead of a broken Quick Start.
+    branch: docs/CHG-PILOT-CLOSE-001/worked-example-readme
+    base_sha: 015bd8756544c1cdd825e7bcbc869f6177dc7d85
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-CLOSE-001/WORK_UNITS.yaml
+      - changes/CHG-PILOT-CLOSE-001/PRS.yaml
+      - README.md
+      - TESTING.md
+    depends_on: []
+    verify:
+      - npm test
       - npm run verify:registry -- --strict

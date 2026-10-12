@@ -1,7 +1,7 @@
 schema_version: 1
 change_id: CHG-TASK-001
 candidate: 2
-state: ready
+state: complete
 plan_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
 approval_digest: 8a994a0ee31d2c8743a808accc02e42541720ee3cad40e0d385c3ff5f3c17f52
 services:
@@ -346,3 +346,11 @@ evidence:
       pilot-back · uv run --locked pytest → exit 0 (대상 08ed728)
       pilot-back · uv run --locked ruff check . → exit 0 (대상 08ed728)
     check_id: check-8
+closure:
+  candidate_merge_sha: 0bbdb1e6a764103a2e348795fe6f8dff3390837d
+  main_ci: https://github.com/human-agent-bootstrap/pilot-coordination/actions/runs/38193482869/job/114631032575
+  environment:
+    note: 127.0.0.1:5173에서 고정된 front ec57ce6b·back 08ed7285 조합으로 작업 등록, 새로고침 후 유지,
+      공백 제목 오류 안내를 사람이 직접 확인했다.
+    confirmed_by: jpyoon
+    confirmed_at: 2026-10-12T04:56:56.753Z

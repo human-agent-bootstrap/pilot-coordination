@@ -91,6 +91,24 @@ export function initializeCandidate({ token }) {
     $('execution').hidden = true;
     await loadSummary();
   }
+  async function startFresh() {
+    generation += 1;
+    clearTimeout(timer);
+    execution = null;
+    $('run').value = '';
+    $('execution').hidden = true;
+    message('');
+    await loadSummary();
+  }
+  function freshButton(label) {
+    const button = node('button', label, 'primary');
+    button.type = 'button';
+    button.addEventListener('click', () => {
+      button.disabled = true;
+      startFresh().catch((error) => { message(error.message, true); button.disabled = false; });
+    });
+    return button;
+  }
   async function loadSummary() {
     const change = $('change').value;
     if (!change) return;
@@ -232,6 +250,7 @@ export function initializeCandidate({ token }) {
           ? `마감 기록이 main에 반영되었습니다. 이 작업은 닫혔습니다.`
           : `마감 PR #${execution.closure.pr.number}을 사람이 확인하고 병합해야 이 작업이 닫힙니다.`));
         parts.push(link(`마감 PR #${execution.closure.pr.number} 열기`, execution.closure.pr.url));
+        if (gates.closureMerged) parts.push(freshButton('새 실행 시작'));
       }
     }
     // A run can fail without throwing: checks simply came back non-zero. Name the failing
@@ -326,6 +345,19 @@ export function initializeCandidate({ token }) {
   function renderExecution() {
     $('execution').hidden = false;
     $('summary').hidden = true;
+    if (execution.stale) {
+      // Every action would fail its freshness gate; offer the only move that works.
+      const notice = node('li', undefined, 'candidate-row blocked');
+      const head = node('div', undefined, 'candidate-row-head');
+      head.append(node('strong', '만료된 실행'), node('span', '막힘', 'candidate-row-state'));
+      notice.append(head, node('p', 'Root main이 이 실행을 승인한 이후로 바뀌었습니다. 이전 증거는 재사용하지 않고 새 실행으로 다시 시작하세요.', 'row-error'),
+        freshButton('새 실행 시작'));
+      $('track').replaceChildren(notice);
+      $('evidence').hidden = true;
+      $('logs').textContent = JSON.stringify({ run: execution.run, phase: execution.phase,
+        approvedBase: execution.approval.baseSha, workspace: execution.workspace }, null, 2);
+      return;
+    }
     $('track').replaceChildren(...ROWS.map((row) => {
       const state = rowState(row.key);
       const item = node('li', undefined, `candidate-row ${state}`);

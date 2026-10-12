@@ -723,3 +723,69 @@ async function verifyFails(f) {
   if (state.phase === 'verified') throw new Error('verification should not have passed');
   throw new Error(state.job?.error ?? state.error ?? 'unknown');
 }
+
+test('a run whose Root base moved reports itself stale instead of only failing actions', async (t) => {
+  const f = fixture(t);
+  await prepared(f);
+  assert.equal(f.serviceApi.status('candidate-run').stale, false);
+
+  // Someone merged something else into main after this run was approved.
+  writeFileSync(join(f.root, 'moved.txt'), 'after approval\n');
+  f.git(['add', 'moved.txt']);
+  f.git(['commit', '-qm', 'unrelated main commit']);
+  f.git(['update-ref', 'refs/remotes/origin/main', f.git(['rev-parse', 'HEAD'])]);
+
+  assert.equal(f.serviceApi.status('candidate-run').stale, true);
+  // The actions still refuse, which is why the screen needs the flag to offer a way out.
+  const state = await done(f.serviceApi, 'verify');
+  assert.notEqual(state.phase, 'verified');
+  assert.match(state.job?.error ?? state.error ?? '', /Root base SHA/);
+});
+
+test('a new run inherits the product suite source from a prior run but not its evidence', async (t) => {
+  const f = fixture(t);
+  const first = await prepared(f);
+  addE2e(first);
+  const verified = await done(f.serviceApi, 'verify');
+  assert.equal(verified.phase, 'verified', JSON.stringify(verified.checks?.filter((c) => c.exitCode !== 0)));
+
+  // Abandon that run and approve a second candidate for the same change.
+  const preview = await f.serviceApi.perform('preview', { change });
+  assert.equal(preview.candidate, '002', 'the used number is not reissued');
+  await f.serviceApi.perform('approve', { revision: preview.revision, run: 'candidate-run-2' });
+  const second = await done(f.serviceApi, 'prepare', 'candidate-run-2');
+  assert.equal(second.phase, 'prepared', JSON.stringify(second.error));
+
+  // Source carried forward, so nobody rewrites the suite by hand.
+  assert.equal(second.hasProductE2e, true);
+  assert.equal(second.inheritedProductE2e.run, 'candidate-run');
+  assert.ok(existsSync(join(second.workspace, 'e2e/product.test.mjs')));
+  // Evidence is not carried: this run starts with no checks and no linked evidence.
+  assert.deepEqual(second.checks, []);
+  assert.deepEqual(second.evidence, []);
+  assert.equal(second.linkedChecks, undefined);
+});
+
+test('a published run is not stale when main moves: that is what merging it does', async (t) => {
+  const f = fixture(t);
+  const prepare = await prepared(f);
+  addE2e(prepare);
+  const verified = await done(f.serviceApi, 'verify');
+  assert.equal(verified.phase, 'verified', JSON.stringify(verified.checks?.filter((c) => c.exitCode !== 0)));
+  const [suggestion] = verified.suggestions;
+  await f.serviceApi.perform('evidence', { run: 'candidate-run',
+    links: [{ criterion: 'AC-001', checkIds: suggestion.checkIds, note: '확인했다.', confirmed: true }] });
+  const created = await done(f.serviceApi, 'pr');
+  assert.equal(created.phase, 'pr-created', JSON.stringify(created.error));
+  assert.equal(created.stale, false);
+
+  // Merging the Candidate PR necessarily moves main past the approved base.
+  writeFileSync(join(f.root, 'merged.txt'), 'candidate merged\n');
+  f.git(['add', 'merged.txt']);
+  f.git(['commit', '-qm', 'merge candidate']);
+  f.git(['update-ref', 'refs/remotes/origin/main', f.git(['rev-parse', 'HEAD'])]);
+
+  // That must not read as an expiry, or the closing form would be hidden.
+  assert.equal(f.serviceApi.status('candidate-run').stale, false);
+  assert.equal(f.serviceApi.status('candidate-run').phase, 'pr-created');
+});

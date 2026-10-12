@@ -6,8 +6,16 @@ prs:
   - key: close-flow
     repo: root
     work_unit: close-flow
+    number: 4
+    state: merged
+    base_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
+    head_sha: a33464830a4c1ef277dc2ae4c906a0dd85288e55
+    merge_sha: 624fcfd3745338a81404c9ec399e5c91e8a19c08
+  - key: close-flow-followups
+    repo: root
+    work_unit: close-flow-followups
     number: null
     state: not-started
-    base_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
+    base_sha: 0bbdb1e6a764103a2e348795fe6f8dff3390837d
     head_sha: null
     merge_sha: null

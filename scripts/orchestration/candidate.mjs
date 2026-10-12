@@ -427,6 +427,36 @@ export function createCandidateService({
     const directory = join(state.workspace, 'e2e');
     return existsSync(directory) && readdirSync(directory).some((name) => name.endsWith('.test.mjs'));
   }
+  // A product suite has no durable home until a Candidate PR merges, so an abandoned run
+  // would otherwise force the Coordinator to rewrite it. Carry the source forward; evidence
+  // is never carried — every run re-runs the suite and records its own result.
+  function inheritProductE2e(state) {
+    if (productE2e(state)) return null;
+    const prior = runs()
+      .filter((item) => item.change === state.change && item.run !== state.run && item.workspace)
+      .sort((left, right) => String(left.run).localeCompare(String(right.run)))
+      .reverse();
+    for (const source of prior) {
+      const directory = join(source.workspace, 'e2e');
+      if (!existsSync(directory)) continue;
+      const suites = readdirSync(directory, { withFileTypes: true })
+        .filter((entry) => entry.isFile() && entry.name.endsWith('.test.mjs'))
+        .map((entry) => entry.name);
+      if (!suites.length) continue;
+      mkdirSync(join(state.workspace, 'e2e'), { recursive: true });
+      const copied = [];
+      for (const name of suites) {
+        assertPathHasNoSymlinks(source.workspace, `e2e/${name}`);
+        const content = readFileSync(join(directory, name));
+        const target = join(state.workspace, 'e2e', name);
+        if (existsSync(target)) continue;
+        writeFileSync(target, content);
+        copied.push({ path: `e2e/${name}`, digest: sha256(content) });
+      }
+      if (copied.length) return { run: source.run, files: copied };
+    }
+    return null;
+  }
   async function prepare(id) {
     const state = load(id);
     if (!['approved', 'preparing', 'prepare-failed'].includes(state.phase)) reject('이 실행은 준비 단계가 아닙니다.');
@@ -477,6 +507,17 @@ export function createCandidateService({
       if (!state.rootDependenciesInstalled) {
         await command(state, 'Root 검증 의존성 준비', 'npm', ['ci', '--include=dev', '--ignore-scripts']);
         state.rootDependenciesInstalled = true;
+        save(state);
+      }
+      if (!state.productE2eInherited) {
+        const inherited = inheritProductE2e(state);
+        if (inherited) {
+          state.inheritedProductE2e = inherited;
+          state.steps.push({ label: '이전 실행의 제품 E2E 승계', status: 'passed', exitCode: 0,
+            command: `copy ${inherited.files.map((file) => file.path).join(', ')} from ${inherited.run}`,
+            output: '소스만 승계했습니다. 증거는 이 실행에서 다시 생성합니다.' });
+        }
+        state.productE2eInherited = true;
         save(state);
       }
       if (!state.recordsPrepared) {
@@ -750,7 +791,14 @@ export function createCandidateService({
     }
     const suggestions = phase === 'verified' && !state.linkedChecks ? suggestEvidence(state, approval) : undefined;
     const hasProductE2e = existsSync(join(state.workspace, '.git')) ? productE2e(state) : Boolean(state.hasProductE2e);
-    return { ...state, phase, approval, job, packet, suggestions, hasProductE2e, needsProductE2e: requiresProductE2e(approval),
+    // A local ref read, no network: an approval pinned to a superseded Root base can never
+    // proceed, so say so instead of letting every action fail one at a time. Only the phases
+    // before publication are gated on freshness — once the Candidate PR exists, main moving
+    // past the approved base is the expected outcome, not an expiry.
+    const head = gitResult(['rev-parse', 'origin/main']);
+    const stale = head.status === 0 && head.stdout.trim() !== approval.baseSha
+      && !['pr-created', 'closing', 'closure-pr-created', 'closed'].includes(phase);
+    return { ...state, phase, approval, job, packet, suggestions, hasProductE2e, stale, needsProductE2e: requiresProductE2e(approval),
       gates: { prCreated: Boolean(state.pr), merged: Boolean(state.remote?.merged), mainCiPassed: Boolean(state.remote?.mainCiPassed),
         integrationEnvironment: state.closure ? 'confirmed' : 'human-confirmation-required',
         closurePrCreated: Boolean(state.closure?.pr), closureMerged: Boolean(state.closure?.merged), closed: phase === 'closed' } };

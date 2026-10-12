@@ -6,7 +6,7 @@ plan_merge_sha: pending
 work_units:
   - id: close-flow
     repo: root
-    state: in_progress
+    state: merged
     goal: Make closing a change a one-screen, two-decision flow and record closure as verifiable state.
     branch: feat/CHG-PILOT-CLOSE-001/close-flow
     base_sha: 9cf22f9d0d2f33b32a4e32bc44a92262de6a39a9
@@ -47,6 +47,25 @@ work_units:
       - TESTING.md
       - WRITER.md
     depends_on: []
+    verify:
+      - npm test
+      - npm run test:ui
+      - npm run verify:registry -- --strict
+  - id: close-flow-followups
+    repo: root
+    state: in_progress
+    goal: Report an expired run, name a failed check, and carry a product suite between runs.
+    branch: feat/CHG-PILOT-CLOSE-001/close-flow-followups
+    base_sha: 0bbdb1e6a764103a2e348795fe6f8dff3390837d
+    writer: whdvlf94
+    write_paths:
+      - changes/CHG-PILOT-CLOSE-001/WORK_UNITS.yaml
+      - changes/CHG-PILOT-CLOSE-001/PRS.yaml
+      - scripts/orchestration/candidate.mjs
+      - tests/candidate.test.mjs
+      - ui/candidate.js
+    depends_on:
+      - close-flow
     verify:
       - npm test
       - npm run test:ui

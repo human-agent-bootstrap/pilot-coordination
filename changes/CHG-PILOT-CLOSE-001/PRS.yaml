@@ -30,8 +30,16 @@ prs:
   - key: ci-gate-hygiene
     repo: root
     work_unit: ci-gate-hygiene
+    number: 9
+    state: merged
+    base_sha: 4d3a9170942be0e0fe99c71affb6b3df94c9b019
+    head_sha: 628b96fd82a9bfbb3176909e63006886da4c8ac0
+    merge_sha: 015bd8756544c1cdd825e7bcbc869f6177dc7d85
+  - key: worked-example-readme
+    repo: root
+    work_unit: worked-example-readme
     number: null
     state: not-started
-    base_sha: 4d3a9170942be0e0fe99c71affb6b3df94c9b019
+    base_sha: 015bd8756544c1cdd825e7bcbc869f6177dc7d85
     head_sha: null
     merge_sha: null
